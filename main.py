@@ -12,9 +12,10 @@ from torch.utils.data import DataLoader
 from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from utils import group_advantages, grpo_loss, sample_trajectory, reward_function, get_batch_log_probs, update_old_policy
+from utils import group_advantages, grpo_loss, sample_trajectory, reward_function, get_batch_log_probs, update_old_policy, train_accuracy
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
+import deepspeed
 
 
 target_model_path = "./Qwen2.5-3B-Instruct"
@@ -26,6 +27,10 @@ dtype = torch.bfloat16
 BATCH_SIZE = 4
 NUM_QUESTIONS_PER_BATCH = 2
 NUM_ANSWERS_PER_QUESTION = BATCH_SIZE // NUM_QUESTIONS_PER_BATCH
+
+# DeepSpeed配置
+USE_DEEPSPEED = True  # 控制是否启用DeepSpeed
+DEEPSPEED_CONFIG = "./deepspeed.json"
 
 
 def setup_gpu_device(gpu_id):
@@ -173,9 +178,24 @@ def new_policy_training_worker(gpu_id, processed_data_queue, stop_event, sync_qu
 
     tokenizer = AutoTokenizer.from_pretrained(ref_model_path, padding_side='left')
 
-    # 初始化优化器和调度器
-    optimizer = AdamW(new_policy_model.parameters(), lr=1e-5, weight_decay=0.01)
-    scheduler = CosineAnnealingLR(optimizer, T_max=1000, eta_min=1e-6)
+    # DeepSpeed配置和初始化
+    if USE_DEEPSPEED:
+        print("正在使用DeepSpeed进行优化训练...")
+        # 准备模型参数
+        model_parameters = list(new_policy_model.parameters())
+        
+        # 初始化DeepSpeed引擎
+        model_engine, optimizer, _, scheduler = deepspeed.initialize(
+            model=new_policy_model,
+            model_parameters=model_parameters,
+            config=DEEPSPEED_CONFIG
+        )
+        print(f"DeepSpeed初始化完成，世界大小: {model_engine.world_size}")
+    else:
+        # 原有的优化器和调度器
+        optimizer = AdamW(new_policy_model.parameters(), lr=1e-5, weight_decay=0.01)
+        scheduler = CosineAnnealingLR(optimizer, T_max=1000, eta_min=1e-6)
+        model_engine = None
 
     # 梯度裁剪参数
     max_grad_norm = 1.0
@@ -219,43 +239,66 @@ def new_policy_training_worker(gpu_id, processed_data_queue, stop_event, sync_qu
             )
 
             # 反向传播和优化步骤
-            optimizer.zero_grad()  # 清除旧梯度
-            loss.backward()        # 反向传播计算梯度
-
-            # 梯度裁剪
-            torch.nn.utils.clip_grad_norm_(new_policy_model.parameters(), max_grad_norm)
-
-            optimizer.step()       # 更新模型参数
-            scheduler.step()       # 更新学习率
+            if USE_DEEPSPEED and model_engine is not None:
+                # DeepSpeed优化步骤
+                model_engine.backward(loss)        # DeepSpeed反向传播
+                model_engine.step()                # DeepSpeed参数更新
+            else:
+                # 原有优化步骤
+                optimizer.zero_grad()  # 清除旧梯度
+                loss.backward()        # 反向传播计算梯度
+                # 梯度裁剪
+                torch.nn.utils.clip_grad_norm_(new_policy_model.parameters(), max_grad_norm)
+                optimizer.step()       # 更新模型参数
+                scheduler.step()       # 更新学习率
 
             train_step += 1
 
             # 定期同步新策略参数到旧策略（非阻塞）
             if sync_queue and train_step % sync_interval == 0:
                 try:
-                    sync_queue.put_nowait(new_policy_model.state_dict())
+                    if USE_DEEPSPEED and model_engine is not None:
+                        # DeepSpeed获取模型状态字典
+                        state_dict = model_engine.module.state_dict()
+                    else:
+                        # 原有模型状态字典
+                        state_dict = new_policy_model.state_dict()
+                    sync_queue.put_nowait(state_dict)
                     print(f"第 {train_step} 步训练后发送模型参数同步请求")
                 except queue.Full:
                     print("同步队列已满，跳过此次同步")
 
             # 定期打印训练信息
             if train_step % 10 == 0:
-                print(f"训练步骤 {train_step}, Loss: {loss.item():.4f}, LR: {scheduler.get_last_lr()[0]:.2e}")
+                format_accuracy, answer_accuracy = train_accuracy(episodes=episodes)
+                if USE_DEEPSPEED and model_engine is not None:
+                    # DeepSpeed获取学习率
+                    current_lr = model_engine.get_lr()[0]
+                else:
+                    # 原有调度器获取学习率
+                    current_lr = scheduler.get_last_lr()[0]
+                print(f"训练步骤 {train_step}, Loss: {loss.item():.4f}, LR: {current_lr:.2e}, F_Acc: {format_accuracy}, A_acc: {answer_accuracy}")
 
             # 定期保存模型检查点（每1000步）
             if train_step % 1000 == 0:
-                checkpoint_path = f"./checkpoints/model_step_{train_step}.pt"
-                os.makedirs("./checkpoints", exist_ok=True)
-                torch.save({
-                    'step': train_step,
-                    'model_state_dict': new_policy_model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'scheduler_state_dict': scheduler.state_dict(),
-                    'loss': loss.item(),
-                }, checkpoint_path)
-                print(f"模型检查点已保存: {checkpoint_path}")
-
-            # TODO(wangjintao): 定期evaluate准确率
+                if USE_DEEPSPEED and model_engine is not None:
+                    # DeepSpeed检查点保存
+                    checkpoint_path = f"./checkpoints/deepspeed_model_step_{train_step}"
+                    os.makedirs("./checkpoints", exist_ok=True)
+                    model_engine.save_checkpoint(checkpoint_path, tag=f"step_{train_step}")
+                    print(f"DeepSpeed模型检查点已保存: {checkpoint_path}")
+                else:
+                    # 原有检查点保存
+                    checkpoint_path = f"./checkpoints/model_step_{train_step}.pt"
+                    os.makedirs("./checkpoints", exist_ok=True)
+                    torch.save({
+                        'step': train_step,
+                        'model_state_dict': new_policy_model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'scheduler_state_dict': scheduler.state_dict(),
+                        'loss': loss.item(),
+                    }, checkpoint_path)
+                    print(f"模型检查点已保存: {checkpoint_path}")
 
         except queue.Empty:
             continue

@@ -5,6 +5,7 @@ from typing import Callable, List
 import re
 from typing import Any, Dict, List, Optional
 import time
+import numpy as np
 
 def group_advantages(rewards: torch.Tensor, num_answers_per_question: int):
     batch_size = rewards.shape[0]
@@ -227,3 +228,19 @@ def update_old_policy(old_policy_model, new_policy_state_dict):
     """将新策略模型的参数同步到旧策略模型"""
     old_policy_model.load_state_dict(new_policy_state_dict)
     print(f"旧策略模型已更新，时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+
+def train_accuracy(episodes: list[Episode]):
+    batch_size = len(episodes)
+
+    format_correct_num = 0
+    answer_correct_num = 0
+    for episode in episodes:
+        if np.abs(1.25 - episode.reward_info["format_reward"]) < 1e-3:
+            format_correct_num = format_correct_num + 1
+        if np.abs(1.0 - episode.reward_info["answer_reward"]) < 1e-3:
+            answer_correct_num = answer_correct_num + 1
+    format_accuracy = float(format_correct_num) / batch_size
+    answer_accuracy = float(answer_correct_num) / batch_size
+
+    return format_accuracy, answer_accuracy
