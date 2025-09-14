@@ -32,9 +32,12 @@ class SamplingWorker:
         self.dtype = dtype_map.get(config["model"]["dtype"], torch.bfloat16)
         self.data_path = config["data"]["data_path"]
         self.max_gen_len = config["data"]["max_gen_len"]
-        self.batch_size = config["training"]["batch_size"]
-        self.num_questions_per_batch = config["training"]["num_questions_per_batch"]
-        self.num_answers_per_question = self.batch_size // self.num_questions_per_batch
+        self.train_batch_size = config["training"]["batch_size"]
+        self.batch_size = config["sampling"]["batch_size"]
+        self.num_answers_per_question = config["sampling"]["num_answers_per_question"]
+        self.num_questions_per_batch = self.batch_size // self.num_answers_per_question
+        #self.num_questions_per_batch = config["training"]["num_questions_per_batch"]
+        #self.num_answers_per_question = self.batch_size // self.num_questions_per_batch
         self.zmq_data_port = config["communication"]["data_port"]
         self.zmq_sync_port = config["communication"]["sync_port"]
 
@@ -210,28 +213,30 @@ class SamplingWorker:
     def run(self):
         """主运行循环"""
         print("开始采样循环...")
+        sample_start_time = time.time()
         sample_count = 0
-        
+
         try:
             while not self.stop_event.is_set():
                 # 采样一批数据
                 episodes = self.sample_batch()
-                
+
                 # 序列化数据
                 serialized_episodes = self.serialize_episodes(episodes)
-                
+
                 # 发送数据到训练进程
                 data = pickle.dumps(serialized_episodes)
                 self.data_sender.send(data)
-                
+
                 sample_count += 1
-                
+                print(f"{time.time() - sample_start_time} 采样{self.batch_size}条数据, {self.num_questions_per_batch}个问题")
+
                 if sample_count % 10 == 0:
                     print(f"采样进程已采样 {sample_count} 批数据")
-                
+
                 # 短暂休眠避免CPU占用过高
                 time.sleep(0.01)
-                
+
         except KeyboardInterrupt:
             print("采样进程收到中断信号")
         except Exception as e:

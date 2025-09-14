@@ -86,7 +86,7 @@ def get_batch_log_probs(
         # 推理模式，不需要梯度
         with torch.no_grad():
             batch_logits = model(input_ids=batch_token_ids, attention_mask=attention_mask).logits
-            
+
     batch_logits = batch_logits[:, :-1, :]       # 去掉最后一个logits, 因为最后一个用于预测下一个token
     batch_token_ids_ = batch_token_ids[:, 1:]     # 去掉第一个token, 因为没有对应的logits用于预测它
 
@@ -199,7 +199,8 @@ def answer_reward_function(response: str, answer: str = None) -> float:
         return -1.0 # 答案中不包含数字, 奖励-1
     num = nums[-1]
 
-    if abs(float(num) - float(answer)) < 1e-5:
+    answer_num = float(answer.replace(',', ''))
+    if abs(float(num) - float(answer_num)) < 1e-5:
         return 1.0
 
     return -1.0 # 答案中数字不匹配, 奖励-1
@@ -207,7 +208,7 @@ def answer_reward_function(response: str, answer: str = None) -> float:
 
 def reward_function(
     response: str,
-    answer: int = None,
+    answer: str = None,
 ) -> Dict[str, Any]:
     """Reward function for Countdown Tasks.
 

@@ -13,10 +13,14 @@ data:
   split: "train"
   test_size: 100
 
+sampling:
+  batch_size: 8
+  num_answers_per_question: 2
+
 # 训练配置
 training:
   batch_size: 4
-  num_questions_per_batch: 2
+  #num_questions_per_batch: 2
   num_answers_per_question: 2  # batch_size // num_questions_per_batch
   learning_rate: 1e-5
   weight_decay: 0.01
@@ -45,8 +49,8 @@ logging:
 
 # GPU配置
 gpu:
-  sampling_gpu: 0      # 采样进程使用的GPU
-  training_gpus: [1, 2, 3]  # 训练进程使用的GPU列表
+  sampling_gpu: 2      # 采样进程使用的GPU
+  training_gpu: 1  # 训练进程使用的GPU列表
 
 # 检查点配置
 checkpoint:

@@ -48,8 +48,8 @@ class Episode:
     reward: float
     reward_info: Dict[str, float]
 
-    old_policy_log_probs: torch.Tensor
-    ref_policy_log_probs: torch.Tensor
+    old_policy_log_probs: np.ndarray
+    ref_policy_log_probs: np.ndarray
 
 @dataclass
 class MiniBatch:
@@ -59,7 +59,7 @@ class MiniBatch:
     prefix_tokens: List[List[str]]
     prefix_token_ids: List[List[int]]
     question: list[str]
-    answer: list[int]
+    answer: list[str]
 
 class Gsm8kTasksDataset(Dataset):
     """Prepare GSM8K Tasks for training"""

@@ -92,11 +92,11 @@ $n_{LoRA}$表示LoRA的旁路矩阵, $n_{total}$表示模型的总参数量, $r$
 | 总计                                       | 19-29GB    | 12-22GB     |
 
 ## 待完善:
+0. 验证目标策略和采样策略的参数同步
 1. 正确率评估
 2. 达到某个条件结束训练
 3. 全量微调结果查看
-4. deepspeed多卡方案
-5. LoRA方案
+4. LoRA方案
 
 启动命令
 ```bash
@@ -104,7 +104,7 @@ $n_{LoRA}$表示LoRA的旁路矩阵, $n_{total}$表示模型的总参数量, $r$
 python sampling.py
 
 # 分布式训练
-CUDA_VISIBLE_DEVICES=1,2 deepspeed --num_gpus=2 training_worker.py
+CUDA_VISIBLE_DEVICES=0,1 deepspeed --num_gpus=2 training_worker.py
 ```
 
 ## 参考资料
