@@ -1,6 +1,12 @@
 import multiprocessing as mp
 import time
 import os
+
+# 必须在任何CUDA导入之前设置多进程启动方法
+if __name__ == '__main__':
+    # 设置spawn启动方法避免CUDA冲突
+    mp.set_start_method('spawn', force=True)
+
 import torch
 import threading
 import queue
@@ -44,14 +50,22 @@ def setup_gpu_device(gpu_id):
 
 def reference_policy_worker(gpu_id, raw_data_queue, processed_data_queue, stop_event):
     """参考策略进程：计算参考策略概率分布，防止目标策略偏离过远"""
-    setup_gpu_device(gpu_id)
-    print(f"参考策略进程启动，PID: {os.getpid()}, GPU: {gpu_id}")
+    try:
+        # 延迟导入CUDA相关库，避免fork冲突
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        
+        setup_gpu_device(gpu_id)
+        print(f"参考策略进程启动，PID: {os.getpid()}, GPU: {gpu_id}")
 
-    device = torch.device(gpu_id)
-    ref_policy_model = AutoModelForCausalLM.from_pretrained(ref_model_path, torch_dtype=torch.bfloat16, _attn_implementation="sdpa").to('cuda')
-    ref_policy_model.eval()
-    ref_policy_model.requires_grad_(False)
-    tokenizer = AutoTokenizer.from_pretrained(ref_model_path, padding_side='left')
+        device = torch.device(gpu_id)
+        ref_policy_model = AutoModelForCausalLM.from_pretrained(ref_model_path, torch_dtype=torch.bfloat16, _attn_implementation="sdpa").to('cuda')
+        ref_policy_model.eval()
+        ref_policy_model.requires_grad_(False)
+        tokenizer = AutoTokenizer.from_pretrained(ref_model_path, padding_side='left')
+    except Exception as e:
+        print(f"参考策略进程初始化错误: {e}")
+        raise
 
     process_count = 0
     while not stop_event.is_set():
@@ -88,15 +102,25 @@ def reference_policy_worker(gpu_id, raw_data_queue, processed_data_queue, stop_e
 
 def old_policy_sampling_worker(gpu_id, raw_data_queue, stop_event, sync_queue=None):
     """旧策略采样进程：持续采样数据到经验回放池"""
-    setup_gpu_device(gpu_id)
-    print(f"旧策略采样进程启动，PID: {os.getpid()}, GPU: {gpu_id}")
+    try:
+        # 延迟导入CUDA相关库，避免fork冲突
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from data_types import Gsm8kTasksDataset
+        from torch.utils.data import DataLoader
+        
+        setup_gpu_device(gpu_id)
+        print(f"旧策略采样进程启动，PID: {os.getpid()}, GPU: {gpu_id}")
 
-    device = torch.device(gpu_id)
-    old_policy_model = AutoModelForCausalLM.from_pretrained(pretrained_model_path, torch_dtype=torch.bfloat16, _attn_implementation="sdpa").to('cuda')
-    old_policy_model.eval()
-    old_policy_model.requires_grad_(False)
+        device = torch.device(gpu_id)
+        old_policy_model = AutoModelForCausalLM.from_pretrained(pretrained_model_path, torch_dtype=torch.bfloat16, _attn_implementation="sdpa").to('cuda')
+        old_policy_model.eval()
+        old_policy_model.requires_grad_(False)
 
-    tokenizer = AutoTokenizer.from_pretrained(ref_model_path, padding_side='left')
+        tokenizer = AutoTokenizer.from_pretrained(ref_model_path, padding_side='left')
+    except Exception as e:
+        print(f"旧策略采样进程初始化错误: {e}")
+        raise
     train_dataset = Gsm8kTasksDataset(
         data_path=data_path,
         tokenizer=tokenizer,
@@ -168,34 +192,43 @@ def old_policy_sampling_worker(gpu_id, raw_data_queue, stop_event, sync_queue=No
 
 def new_policy_training_worker(gpu_id, processed_data_queue, stop_event, sync_queue=None):
     """新策略训练进程：从处理后的数据队列获取数据训练"""
-    setup_gpu_device(gpu_id)
-    print(f"新策略训练进程启动，PID: {os.getpid()}, GPU: {gpu_id}")
-
-    device = torch.device(gpu_id)
-    new_policy_model = AutoModelForCausalLM.from_pretrained(pretrained_model_path, torch_dtype=torch.bfloat16, _attn_implementation="sdpa").to('cuda')
-    new_policy_model.train()  # 设置为训练模式
-    new_policy_model.requires_grad_(True)
-
-    tokenizer = AutoTokenizer.from_pretrained(ref_model_path, padding_side='left')
-
-    # DeepSpeed配置和初始化
-    if USE_DEEPSPEED:
-        print("正在使用DeepSpeed进行优化训练...")
-        # 准备模型参数
-        model_parameters = list(new_policy_model.parameters())
+    try:
+        # 延迟导入CUDA相关库，避免fork冲突
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        import deepspeed
         
-        # 初始化DeepSpeed引擎
-        model_engine, optimizer, _, scheduler = deepspeed.initialize(
-            model=new_policy_model,
-            model_parameters=model_parameters,
-            config=DEEPSPEED_CONFIG
-        )
-        print(f"DeepSpeed初始化完成，世界大小: {model_engine.world_size}")
-    else:
-        # 原有的优化器和调度器
-        optimizer = AdamW(new_policy_model.parameters(), lr=1e-5, weight_decay=0.01)
-        scheduler = CosineAnnealingLR(optimizer, T_max=1000, eta_min=1e-6)
-        model_engine = None
+        setup_gpu_device(gpu_id)
+        print(f"新策略训练进程启动，PID: {os.getpid()}, GPU: {gpu_id}")
+
+        device = torch.device(gpu_id)
+        new_policy_model = AutoModelForCausalLM.from_pretrained(pretrained_model_path, torch_dtype=torch.bfloat16, _attn_implementation="sdpa").to('cuda')
+        new_policy_model.train()  # 设置为训练模式
+        new_policy_model.requires_grad_(True)
+
+        tokenizer = AutoTokenizer.from_pretrained(ref_model_path, padding_side='left')
+
+        # DeepSpeed配置和初始化
+        if USE_DEEPSPEED:
+            print("正在使用DeepSpeed进行优化训练...")
+            # 准备模型参数
+            model_parameters = list(new_policy_model.parameters())
+            
+            # 初始化DeepSpeed引擎
+            model_engine, optimizer, _, scheduler = deepspeed.initialize(
+                model=new_policy_model,
+                model_parameters=model_parameters,
+                config=DEEPSPEED_CONFIG
+            )
+            print(f"DeepSpeed初始化完成，世界大小: {model_engine.world_size}")
+        else:
+            # 原有的优化器和调度器
+            optimizer = AdamW(new_policy_model.parameters(), lr=1e-5, weight_decay=0.01)
+            scheduler = CosineAnnealingLR(optimizer, T_max=1000, eta_min=1e-6)
+            model_engine = None
+    except Exception as e:
+        print(f"新策略训练进程初始化错误: {e}")
+        raise
 
     # 梯度裁剪参数
     max_grad_norm = 1.0

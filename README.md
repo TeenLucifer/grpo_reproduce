@@ -98,6 +98,15 @@ $n_{LoRA}$表示LoRA的旁路矩阵, $n_{total}$表示模型的总参数量, $r$
 4. deepspeed多卡方案
 5. LoRA方案
 
+启动命令
+```bash
+# 采样
+python sampling.py
+
+# 分布式训练
+CUDA_VISIBLE_DEVICES=1,2 deepspeed --num_gpus=2 training_worker.py
+```
+
 ## 参考资料
 - [GRPO-Zero](https://github.com/policy-gradient/GRPO-Zero)
 - [simple_GRPO](https://github.com/lsdefine/simple_GRPO)
