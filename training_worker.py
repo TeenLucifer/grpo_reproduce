@@ -71,12 +71,12 @@ class TrainingWorker:
             print("正在使用DeepSpeed进行优化训练...")
 
             dist.init_process_group(backend='gloo')  # autodl的vgpu没法用nccl通信, 需要设置为gloo
-                        
+
             # 获取当前进程的rank和world_size
             self.rank = dist.get_rank()
             self.world_size = dist.get_world_size()
             self.is_main_process = (self.rank == 0)
-            
+
             print(f"DeepSpeed进程初始化 - Rank: {self.rank}, World Size: {self.world_size}, Is Main Process: {self.is_main_process}")
             
             # 加载DeepSpeed配置

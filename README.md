@@ -1,16 +1,60 @@
 # GRPO方法复现
-微调qwen2.5-3B-Instruct模型, 用GRPO算法
+本项目复现了deepseek的[GRPO算法](https://arxiv.org/pdf/2402.03300), 用GSM8K数据集微调qwen2.5-3B-Instruct模型
 
-## GRPO算法实现步骤
+## 训练效果
+(效果图展示)
+
+## GRPO算法
+GRPO在PPO算法的基础上改进, PPO算法为Actor-Critic网络结构, 需要同时训练Actor和Critci两个网络, 对于动辄几十亿参数的大语言模型来说训练开销太大. GRPO方法的优化点在于对同一问题采样多次, 称为一组, 用组内回报的均值来代替Critic网络, 减少了一半训练开销. 此外, GRPO方法还引入了参考策略, 用参考策略的输出分布作为teacher让目标策略快速学习以达到teacher的水平.
+
+目标函数:
 $$
 J(\theta) = E_{\pi_\theta}\left[\min\left(\frac{P_\theta(a|s)}{P_{\theta'}(a|s)}\hat{A}_{\theta'}(s, a), \text{clip}\left(\frac{P_\theta(a|s)}{P_{\theta'}(a|s)}, 1-\epsilon, 1+\epsilon\right) \hat{A}_{\theta'}(s, a)\right) - \beta D_{KL}(P_\theta, P_{ref}) \right]
 $$
-
-其中, $\hat{A}_{\theta'}(s, a)$为分组计算的回报值估算的优势, 用$\mathbf{r}$表示组内回报值, 具体计算方式为:
+组内回报值:
 $$
 \hat{A}_{\theta'}(s, a) = \mathbf{r} - \frac{\text{mean}(\mathbf{r})}{\text{std}(\mathbf{r})}
 $$
 
+## 训练框架
+(框图)
+
+sequenceDiagram
+    participant S as Sample进程
+    participant R0 as Train Rank 0
+    participant R1 as Train Rank 1
+    Note over R0, R1: DeepSpeed启动的两个进程
+
+    Note over S: 采样得到一批完整数据<br/>[0,1,2,3,...,N]
+    S->>R0: (ZMQ) 发送完整数据批次
+
+    Note over R0: 接收完整数据<br/>负责广播
+    R0->>R1: dist.broadcast(tensor, src=0)
+    Note over R0, R1: 所有进程现在拥有相同完整数据
+
+    Note over R0: 数据分割
+    Note over R0: Rank 0 计算自己的数据分片
+    Note over R1: Rank 1 计算自己的数据分片
+    R0->>R0: [0, 1, ..., M-1] (前一半)
+    R1->>R1: [M, M+1, ..., N] (后一半)
+
+    Note over R0, R1: 各自处理自己的数据分片
+    Note over R0, R1: 计算前向/反向传播
+
+    Note over R0, R1: 同步梯度 (all-reduce)
+    R0->>R1: 交换并平均梯度
+    R1->>R0: 交换并平均梯度
+    Note over R0, R1: 所有进程获得相同的平均梯度
+
+    Note over R0, R1: 各自用平均梯度更新模型参数
+
+### 采样进程
+采样进程部署参考策略和目标模型旧策略
+
+### 训练进程
+训练进程用于训练目标模型新策略
+
+### GRPO算法实现步骤
 创建3个进程, 主进程用于训练, 其余两个一个用于旧策略采样数据, 一个用于参考策略推理
 
 两块卡, A用于训练, B用于部署参考模型, 分为训练和推理两个程序运行
@@ -45,7 +89,7 @@ Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
 #### 72
 ```
 
-## Reward Function设计
+### Reward Function
 1. 答案奖励: 答案正确奖励+1, 错误奖励-1
 2. 格式奖励: 格式正确奖励+1.25, 错误奖励-1
 
@@ -55,41 +99,41 @@ Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
 git clone https://huggingface.co/datasets/openai/gsm8k
 # Qwen2.5-3B-Instruct模型下载
 git clone https://huggingface.co/Qwen/Qwen2.5-3B-Instruct
-# Qwen2.5-7B-Instruct模型下载
-git clone https://huggingface.co/Qwen/Qwen2.5-7B-Instruct
+# 启动采样进程
+python sampling.py
+# 启动分布式训练进程
+CUDA_VISIBLE_DEVICES=0,1 deepspeed --num_gpus=2 training_worker.py
 ```
 
 ## 显存估算
-目标模型Qwen2.5-3B-Instruct, 参考模型Qwen2.5-7B-Instruct
+本项目在FP16/BF16全量微调情况下需要60~70GB左右显存, LoRA微调需要30~40GB左右显存. 显存占用来自3部分, 参考模型部署和推理, 目标模型旧策略部署和推理, 目标模型新策略训练.
 
-FP16/BF16全量微调情况下需要60~70GB左右显存, LoRA微调需要30~40GB左右显存
-### 参考模型部署显存
-以Qwen2.5-7B-Instruct FP16/BF16为例
+本项目中参考模型和目标模型都用Qwen2.5-3B-Instruct, 参数类型为BF16, 参考模型、目标模型旧策略的部署和推理约占20G左右显存. 目标模型新策略训练占用情况如下表所示
 
-总显存开销 = 参数显存 + KV Cache + 激活值 + 框架开销 = 16~18GB
+全量微调显存占用分析表
+| 配置                                     | 显存占用 |
+|-----------------------------------------|---------|
+| 模型参数(1份模型参数)                      | 6GB     |
+| 梯度(1份模型参数)                         | 6GB     |
+| AdamW优化器(F32 2份模型参数, 1阶矩+2阶矩)   | 24GB    |
+| 激活值等                                 | 5-15GB  |
+| 总计                                    | 41-51GB  |
 
-### 目标模型全量微调显存
-| 配置                                  | FP32精度  | FP16/BF16精度 |
-|---------------------------------------|---------|-------------|
-| 模型参数(1份模型参数)                    | 12GB    | 6GB         |
-| 梯度(1份模型参数)                       | 12GB    | 6GB         |
-| AdamW优化器(F32 2份模型参数, 1阶矩+2阶矩) | 24GB    | 24GB        |
-| 激活值等                               | 5-15GB  | 5-15GB      |
-| 总计                                   | 53-63GB | 41-51GB     |
-### 目标模型LoRA微调显存
-LoRA旁路矩阵的参数量估算:
+LoRA微调显存显存占用分析表
+| 配置                                       |   显存占用    |
+|--------------------------------------------|-------------|
+| 模型参数(1份模型参数+1份旁路矩阵参数)           | 6GB+0.2GB   |
+| 梯度(1份旁路矩阵参数)                        | 0.2GB       |
+| AdamW优化器(F32 2份旁路矩阵参数, 1阶矩+2阶矩)  | 0.75GB      |
+| 激活值等                                    | 5-15GB      |
+| 总计                                       | 12-22GB     |
+
+LoRA旁路矩阵的参数量估算方式:
 $$
 n_{LoRA} = n_{total} \frac{2r}{d_{model}}
 $$
-$n_{LoRA}$表示LoRA的旁路矩阵, $n_{total}$表示模型的总参数量, $r$表示秩(旁路矩阵的维度), $d_{model}$表示模型的隐藏层维度.
-对于Qwen2.5-3B模型来说$d_{model}=2048$, 以$r=32$为例, 用LoRA方法微调的显存估算为:
-| 配置                                       | FP32精度   | FP16/BF16精度 |
-|-------------------------------------------|------------|-------------|
-| 模型参数(1份模型参数+1份旁路矩阵参数)          | 12GB+0.4GB | 6GB+0.2GB         |
-| 梯度(1份旁路矩阵参数)                        | 0.4GB      | 0.2GB         |
-| AdamW优化器(F32 2份旁路矩阵参数, 1阶矩+2阶矩) | 0.75GB      | 0.75GB        |
-| 激活值等                                   | 5-15GB      | 5-15GB      |
-| 总计                                       | 19-29GB    | 12-22GB     |
+n_LoRA表示LoRA的旁路矩阵参数量, n_total表示模型的总参数量, r表示秩(旁路矩阵的维度), d_model表示模型的隐藏层维度.
+对于Qwen2.5-3B模型来说d_model=2048, 以r=32为例, 涉及到训练参数, 梯度, 优化器状态的旁路矩阵参数量为全量微调的64/2048=1/32
 
 ## 待完善:
 0. 验证目标策略和采样策略的参数同步
@@ -98,16 +142,14 @@ $n_{LoRA}$表示LoRA的旁路矩阵, $n_{total}$表示模型的总参数量, $r$
 3. 全量微调结果查看
 4. LoRA方案
 
-启动命令
-```bash
-# 采样
-python sampling.py
-
-# 分布式训练
-CUDA_VISIBLE_DEVICES=0,1 deepspeed --num_gpus=2 training_worker.py
-```
+## 踩坑记录
+1. autodl vgpu进行分布式训练时需要把后台通信改为gloo, nccl仅支持物理GPU的通信
+2. 类似GRPO算法涉及到旧策略、新策略、参考策略多个模型, 若采样与训练分离在多个GPU上, 用deepspeed进行分布式时需要注意数据并行需要手动完成, 通过zmq或socket等方式完成通信后, 在deepspeed fork的进程中区分主副进程, 主进程分割数据广播至副进程, 防止资源竞争
+3. 同样从训练进程同步模型参数至采样进程时, 也需要通过主进程单独完成
 
 ## 参考资料
+- [GRPO论文](https://arxiv.org/pdf/2402.03300)
 - [GRPO-Zero](https://github.com/policy-gradient/GRPO-Zero)
 - [simple_GRPO](https://github.com/lsdefine/simple_GRPO)
 - [Qwen2.5](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct)
+- [GSM8K](https://huggingface.co/datasets/openai/gsm8k)
