@@ -40,9 +40,12 @@ class TrainingWorker:
         self.num_answers_per_question = config["training"]["num_answers_per_question"]
         self.num_questions_per_batch = self.batch_size // self.num_answers_per_question
         self.zmq_data_port = config["communication"]["data_port"]
-        self.zmq_sync_port = config["communication"]["sync_port"]
         self.use_deepspeed = config["deepspeed"]["enabled"]
         self.ds_config_path = config["deepspeed"]["config_path"]
+        self.ckpt_dir = Path(config["checkpoint"]["ckpt_dir"])
+        self.ckpt_file = config["checkpoint"]["ckpt_file"]
+        self.sync_interval = config["checkpoint"]["sync_interval"]
+        self.ckpt_dir.mkdir(parents=True, exist_ok=True)
 
         # DeepSpeed多进程相关属性
         self.rank = 0
@@ -78,7 +81,7 @@ class TrainingWorker:
             self.is_main_process = (self.rank == 0)
 
             print(f"DeepSpeed进程初始化 - Rank: {self.rank}, World Size: {self.world_size}, Is Main Process: {self.is_main_process}")
-            
+
             # 加载DeepSpeed配置
             try:
                 with open(self.ds_config_path, 'r') as f:
@@ -124,26 +127,15 @@ class TrainingWorker:
             self.data_receiver = self.context.socket(zmq.PULL)
             self.data_receiver.connect(f"tcp://localhost:{self.zmq_data_port}")
             print(f"ZeroMQ数据接收端口连接: {self.zmq_data_port}")
-
-            # 模型参数发送socket（PUSH模式）
-            self.sync_sender = self.context.socket(zmq.PUSH)
-            self.sync_sender.connect(f"tcp://localhost:{self.zmq_sync_port}")
-            print(f"ZeroMQ同步发送端口连接: {self.zmq_sync_port}")
         else:
             # 非主进程不需要ZMQ连接
             self.data_receiver = None
-            self.sync_sender = None
             print(f"Rank {self.rank} 进程跳过ZMQ连接（由rank 0处理）")
 
         # 数据接收socket（PULL模式）
         self.data_receiver = self.context.socket(zmq.PULL)
         self.data_receiver.connect(f"tcp://localhost:{self.zmq_data_port}")
         print(f"ZeroMQ数据接收端口连接: {self.zmq_data_port}")
-
-        # 模型参数发送socket（PUSH模式）
-        self.sync_sender = self.context.socket(zmq.PUSH)
-        self.sync_sender.connect(f"tcp://localhost:{self.zmq_sync_port}")
-        print(f"ZeroMQ同步发送端口连接: {self.zmq_sync_port}")
 
     def deserialize_episodes(self, serialized_data):
         """反序列化episodes数据"""
@@ -165,78 +157,41 @@ class TrainingWorker:
             episodes.append(episode)
         return episodes
 
-    def split_episodes_by_rank(self, episodes):
-        """将episodes按rank进行分割，保持组完整性"""
-        if self.world_size <= 1:
-            return episodes
-            
-        total_questions = len(episodes) // self.num_answers_per_question
-        questions_per_rank = total_questions // self.world_size
-        
-        # 确保能整除，保持组完整性
-        if total_questions % self.world_size != 0:
-            # 如果不能整除，向下取整，多余的组由rank=0处理
-            questions_per_rank = total_questions // self.world_size
-            if self.rank == 0:
-                start_question = 0
-                end_question = questions_per_rank + (total_questions % self.world_size)
-            else:
-                start_question = (total_questions % self.world_size) + (self.rank - 1) * questions_per_rank
-                end_question = start_question + questions_per_rank
-        else:
-            start_question = self.rank * questions_per_rank
-            end_question = start_question + questions_per_rank
-        
-        # 转换为episode索引
-        start_idx = start_question * self.num_answers_per_question
-        end_idx = end_question * self.num_answers_per_question
-        
-        split_episodes = episodes[start_idx:end_idx]
-        
-        print(f"Rank {self.rank}: 处理问题 {start_question}-{end_question-1}, "
-              f"Episodes {start_idx}-{end_idx-1}, 共 {len(split_episodes)} 个")
-        
-        return split_episodes
-
     def broadcast_episodes(self, episodes):
         """将episodes数据从rank=0广播到所有其他rank"""
         if self.use_deepspeed and self.world_size > 1:
-            # 先进行数据分割，再广播分割后的数据
             if self.is_main_process:
-                # rank=0分割数据并决定每个rank处理哪些组
-                all_split_data = []
-                for rank in range(self.world_size):
-                    rank_episodes = self.split_episodes_by_rank(episodes)
-                    all_split_data.append(pickle.dumps(rank_episodes))
-                
-                # 广播数据大小信息
-                data_sizes = [len(data) for data in all_split_data]
-                sizes_tensor = torch.tensor(data_sizes, dtype=torch.long, device=self.device)
+                serialized_data = pickle.dumps(episodes)
+                np_data = np.frombuffer(serialized_data, dtype=np.uint8)
+                size_tensor = torch.from_numpy(np.array([len(np_data)], dtype=np.int64)).to(self.device)
+                episodes_tensor = torch.from_numpy(np_data.copy()).to(self.device)
             else:
-                sizes_tensor = torch.zeros(self.world_size, dtype=torch.long, device=self.device)
-            
-            # 广播所有rank的数据大小
-            dist.broadcast(sizes_tensor, src=0)
-            data_size = sizes_tensor[self.rank].item()
-            
-            # 准备数据tensor
-            if self.is_main_process:
-                data_tensor = torch.zeros(data_size, dtype=torch.uint8, device=self.device)
-                # 获取当前rank的数据
-                rank_data = all_split_data[self.rank]
-                np_data = np.frombuffer(rank_data, dtype=np.uint8)
-                data_tensor[:len(np_data)] = torch.from_numpy(np_data.copy()).to(self.device)
-            else:
-                data_tensor = torch.zeros(data_size, dtype=torch.uint8, device=self.device)
-            
+                size_tensor = torch.zeros(1, dtype=torch.int64, device=self.device)
+                episodes_tensor = None
+
+            # 广播数据长度
+            dist.broadcast(size_tensor, src=0)
+            data_size = size_tensor.item()
+
+            if not self.is_main_process:
+                episodes_tensor = torch.zeros(data_size, dtype=torch.uint8, device=self.device)
+
             # 广播实际数据（每个rank接收自己的部分）
-            dist.broadcast(data_tensor, src=0)
-            
+            dist.broadcast(episodes_tensor, src=0)
+
             # 反序列化数据
-            serialized_data = data_tensor.cpu().numpy().tobytes()
+            serialized_data = episodes_tensor.cpu().numpy().tobytes()
             episodes = pickle.loads(serialized_data)
 
-            return episodes
+            # 不同的rank分割episodes
+            sample_batch_size = len(episodes)
+            sample_questions_per_batch = sample_batch_size // self.num_answers_per_question
+            num_questions_per_rank = sample_questions_per_batch // self.world_size
+            num_data_per_rank = num_questions_per_rank * self.num_answers_per_question
+
+            episodes_per_rank = episodes[self.rank*num_data_per_rank : self.rank*num_data_per_rank+num_data_per_rank]
+
+            return episodes_per_rank
         else:
             # 单进程模式，直接返回
             return episodes
@@ -297,26 +252,6 @@ class TrainingWorker:
 
         return loss
 
-    def sync_model_parameters(self, train_step):
-        """同步模型参数到采样进程"""
-        try:
-            if self.use_deepspeed and self.model_engine is not None:
-                # DeepSpeed获取模型状态字典
-                state_dict = self.model_engine.module.state_dict()
-            else:
-                # 原有模型状态字典
-                state_dict = self.new_policy_model.state_dict()
-
-            # 序列化并发送
-            state_dict_data = pickle.dumps(state_dict)
-            self.sync_sender.send(state_dict_data)
-            print(f"第 {train_step} 步训练后发送模型参数同步请求")
-
-        except zmq.Again:
-            print("同步队列已满，跳过此次同步")
-        except Exception as e:
-            print(f"模型参数同步错误: {e}")
-
     def save_checkpoint(self, train_step, loss):
         """保存模型检查点"""
         if train_step % 100 == 0:
@@ -343,13 +278,12 @@ class TrainingWorker:
         """主运行循环"""
         print(f"Rank {self.rank} 开始训练循环...")
         train_step = 0
-        sync_interval = 25  # 每25个训练步骤同步一次
 
         try:
             while not self.stop_event.is_set():
                 try:
                     episodes = None
-                    
+
                     # 数据接收逻辑：只有rank=0从ZMQ接收，其他rank等待广播
                     if self.is_main_process:
                         # 主进程从ZMQ接收数据
@@ -357,30 +291,36 @@ class TrainingWorker:
                             data = self.data_receiver.recv()
                             serialized_episodes = pickle.loads(data)
                             episodes = self.deserialize_episodes(serialized_episodes)
-                            print(f"Rank 0 接收到数据，批次大小: {len(episodes)}")
+                            sample_batch_size = len(episodes)
+                            assert sample_batch_size % self.num_answers_per_question == 0 # 检查sample_batch_size是否能被num_answers_per_question整除
+                            sample_questions_per_batch = sample_batch_size // self.num_answers_per_question
+                            assert sample_questions_per_batch % self.world_size == 0 # 检查sample_questions_per_batch是否能被world_size整除
                         else:
                             # 没有数据，继续循环
                             time.sleep(0.01)
                             continue
-                    
+
                     # 广播数据到所有rank
                     if self.use_deepspeed and self.world_size > 1:
                         episodes = self.broadcast_episodes(episodes)
-                    
+
                     # 如果所有rank都没有数据，继续循环
                     if episodes is None or len(episodes) == 0:
                         time.sleep(0.01)
                         continue
-                    
-                    print(f"Rank {self.rank} 开始训练步骤，数据批次大小: {len(episodes)}")
+
+                    rewards = [episode.reward for episode in episodes]
+                    print(f"Rank {self.rank} 开始训练步骤{train_step}，数据批次大小: {len(episodes)}, 奖励为: {rewards}")
 
                     # 执行训练步骤
                     loss = self.train_step(episodes)
                     train_step += 1
-                    
+
                     # 定期同步模型参数（只有主进程需要同步到采样进程）
-                    if self.is_main_process and train_step % sync_interval == 0:
-                        self.sync_model_parameters(train_step)
+                    if self.is_main_process and train_step % self.sync_interval == 0:
+                        output_file = self.ckpt_dir / self.ckpt_file
+                        torch.save(self.model_engine.state_dict(), output_file)
+                        print(f"第 {train_step} 步训练后保存模型参数至 {output_file}")
 
                     # 定期打印训练信息（只有主进程打印，避免重复输出）
                     if self.is_main_process and train_step % 10 == 0:
@@ -423,10 +363,10 @@ class TrainingWorker:
                 self.data_receiver.close()
             if hasattr(self, 'sync_sender') and self.sync_sender:
                 self.sync_sender.close()
-        
+
         if hasattr(self, 'context'):
             self.context.term()
-        
+
         print(f"Rank {self.rank} 训练进程已清理完成")
 
 
@@ -438,13 +378,13 @@ def main():
 
     # 创建训练进程实例
     worker = TrainingWorker(config=config)
-    
+
     print("=== GRPO训练进程 ===")
     print(f"数据端口: {config["communication"]["data_port"]}")
     print(f"同步端口: {config["communication"]["sync_port"]}")
     print(f"DeepSpeed: {'启用' if config["deepspeed"]["enabled"] else '禁用'}")
     print(f"当前进程: Rank {worker.rank}/{worker.world_size-1}, 主进程: {worker.is_main_process}")
-    
+
     print("初始化成功")
     worker.run()
 

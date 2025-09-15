@@ -36,10 +36,10 @@ class SamplingWorker:
         self.batch_size = config["sampling"]["batch_size"]
         self.num_answers_per_question = config["sampling"]["num_answers_per_question"]
         self.num_questions_per_batch = self.batch_size // self.num_answers_per_question
-        #self.num_questions_per_batch = config["training"]["num_questions_per_batch"]
-        #self.num_answers_per_question = self.batch_size // self.num_questions_per_batch
         self.zmq_data_port = config["communication"]["data_port"]
-        self.zmq_sync_port = config["communication"]["sync_port"]
+        self.use_deepspeed = config["deepspeed"]["enabled"]
+        self.ckpt_dir = Path(config["checkpoint"]["ckpt_dir"])
+        self.ckpt_file = config["checkpoint"]["ckpt_file"]
 
         self.device = torch.device(f'cuda:{self.gpu_id}' if torch.cuda.is_available() else 'cpu')
         self.setup_models()
@@ -108,39 +108,6 @@ class SamplingWorker:
         self.data_sender = self.context.socket(zmq.PUSH)
         self.data_sender.bind(f"tcp://*:{self.zmq_data_port}")
         print(f"ZeroMQ数据发送端口绑定: {self.zmq_data_port}")
-
-        # 模型参数接收socket（PULL模式）
-        self.sync_receiver = self.context.socket(zmq.PULL)
-        self.sync_receiver.bind(f"tcp://*:{self.zmq_sync_port}")
-        print(f"ZeroMQ同步接收端口绑定: {self.zmq_sync_port}")
-
-        # 启动同步监听线程
-        self.sync_thread = threading.Thread(target=self.sync_listener)
-        self.sync_thread.daemon = True
-        self.sync_thread.start()
-
-    def sync_listener(self):
-        """监听模型参数同步的线程"""
-        print("模型参数同步监听线程启动")
-        sync_interval = 5  # 每5批数据同步一次
-        batch_count = 0
-
-        while not self.stop_event.is_set():
-            try:
-                # 非阻塞接收模型参数
-                if self.sync_receiver.poll(100):  # 100ms超时
-                    print("接收模型参数同步请求...")
-                    state_dict_data = self.sync_receiver.recv()
-                    state_dict = pickle.loads(state_dict_data)
-
-                    # 更新旧策略模型参数
-                    update_old_policy(self.old_policy_model, state_dict)
-                    print(f"第 {batch_count} 批数据采样前同步新策略参数")
-
-            except Exception as e:
-                print(f"同步监听错误: {e}")
-
-            time.sleep(0.1)
 
     def sample_batch(self):
         """采样一批数据"""
@@ -213,7 +180,7 @@ class SamplingWorker:
     def run(self):
         """主运行循环"""
         print("开始采样循环...")
-        sample_start_time = time.time()
+        last_sample_time = time.time()
         sample_count = 0
 
         try:
@@ -228,11 +195,27 @@ class SamplingWorker:
                 data = pickle.dumps(serialized_episodes)
                 self.data_sender.send(data)
 
+                rewards = [episode.reward for episode in episodes]
                 sample_count += 1
-                print(f"{time.time() - sample_start_time} 采样{self.batch_size}条数据, {self.num_questions_per_batch}个问题")
+                print(f"{time.time() - last_sample_time:.2f}s, 采样{self.batch_size}条数据, {self.num_questions_per_batch}个问题, 奖励为: {rewards}")
+                last_sample_time = time.time()
 
                 if sample_count % 10 == 0:
-                    print(f"采样进程已采样 {sample_count} 批数据")
+                    print(f"采样进程已采样 {sample_count} 批数据, 并尝试加载最新模型参数")
+                    ckpt_path = self.ckpt_dir / self.ckpt_file
+                    if not ckpt_path:
+                        print(f"最新模型参数不存在, 跳过")
+                    else:
+                        try:
+                            checkpoint = torch.load(ckpt_path, map_location=self.device, weights_only=True)
+                            state_dict = checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint
+                            if self.use_deepspeed:
+                                # deepspeed保存的模型参数key有module前缀, 加载时需要移除module, 否则键不匹配
+                                state_dict = {k.replace('module.', '', 1): v for k, v in state_dict.items()}
+                            self.old_policy_model.load_state_dict(state_dict)
+                            print(f"成功更新最新模型参数: {ckpt_path}")
+                        except Exception as e:
+                            print(f"加载最新模型参数失败: {ckpt_path}, 错误: {e}")
 
                 # 短暂休眠避免CPU占用过高
                 time.sleep(0.01)
@@ -243,7 +226,7 @@ class SamplingWorker:
             print(f"采样进程错误: {e}")
         finally:
             self.cleanup()
-    
+
     def cleanup(self):
         """清理资源"""
         print("清理采样进程资源...")

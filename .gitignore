@@ -1,5 +1,7 @@
 gsm8k/
+Qwen2.5-1.5B-Instruct/
 Qwen2.5-3B-Instruct/
 Qwen2.5-7B-Instruct/
+checkpoints/
 __pycache__/
 test.py
