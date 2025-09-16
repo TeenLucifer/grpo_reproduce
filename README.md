@@ -17,36 +17,7 @@ $$
 $$
 
 ## 训练框架
-(框图)
-
-sequenceDiagram
-    participant S as Sample进程
-    participant R0 as Train Rank 0
-    participant R1 as Train Rank 1
-    Note over R0, R1: DeepSpeed启动的两个进程
-
-    Note over S: 采样得到一批完整数据<br/>[0,1,2,3,...,N]
-    S->>R0: (ZMQ) 发送完整数据批次
-
-    Note over R0: 接收完整数据<br/>负责广播
-    R0->>R1: dist.broadcast(tensor, src=0)
-    Note over R0, R1: 所有进程现在拥有相同完整数据
-
-    Note over R0: 数据分割
-    Note over R0: Rank 0 计算自己的数据分片
-    Note over R1: Rank 1 计算自己的数据分片
-    R0->>R0: [0, 1, ..., M-1] (前一半)
-    R1->>R1: [M, M+1, ..., N] (后一半)
-
-    Note over R0, R1: 各自处理自己的数据分片
-    Note over R0, R1: 计算前向/反向传播
-
-    Note over R0, R1: 同步梯度 (all-reduce)
-    R0->>R1: 交换并平均梯度
-    R1->>R0: 交换并平均梯度
-    Note over R0, R1: 所有进程获得相同的平均梯度
-
-    Note over R0, R1: 各自用平均梯度更新模型参数
+![框图](./docs/framework.png)
 
 ### 采样进程
 采样进程部署参考策略和目标模型旧策略

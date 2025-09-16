@@ -1,0 +1,2725 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://mermaid-to-excalidraw.vercel.app",
+  "elements": [
+    {
+      "id": "9YXVT_yQ3sKJyonIQxaUL",
+      "type": "rectangle",
+      "x": 305,
+      "y": 177.14285714285688,
+      "width": 1170,
+      "height": 900.5523565383182,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1826998395,
+      "version": 398,
+      "versionNonce": 1435796405,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "Hrg1f_Fqh6MVeAEsolAZz"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "IqWGC_IbS_ihXQ3oATxHi",
+      "type": "rectangle",
+      "x": 325,
+      "y": 240.71428571428578,
+      "width": 1120,
+      "height": 799.1237851097467,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 328552629,
+      "version": 520,
+      "versionNonce": 1588493851,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "IWYPo0yJAN_A_rfOmEFzc"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "7JxrCZi5OIDjZIzvWY8WY",
+      "type": "rectangle",
+      "x": 1146.3333333333335,
+      "y": 479.99999999999994,
+      "width": 260,
+      "height": 295.79998779296875,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 397213979,
+      "version": 583,
+      "versionNonce": 135546133,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "4YXzAeqv9uJwbmeBsQFXT"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "diFnbV3gNvRkLXVwmu2Ij",
+      "type": "rectangle",
+      "x": 710.3333333333334,
+      "y": 479.6666666666667,
+      "width": 260,
+      "height": 295.79998779296875,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1181970965,
+      "version": 587,
+      "versionNonce": 1712194235,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "hA8CcTZ9TlNajbSTBfhdv"
+        },
+        {
+          "id": "rjdFyRK0rZeIH3A7bSv9f",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "tXiqeMkQr1mPSLb3Mmk5N",
+      "type": "rectangle",
+      "x": 347.25,
+      "y": 378.79999923706055,
+      "width": 274.16666666666674,
+      "height": 396.79998779296875,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 574891451,
+      "version": 633,
+      "versionNonce": 1272240757,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "cr3nacCM-p8fGnPwa0bnP"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "ZbNLlQuxkMBE5Gtcyh2SM",
+      "type": "rectangle",
+      "x": -80,
+      "y": 179.1333325703938,
+      "width": 285,
+      "height": 304.6666666666667,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_采样进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 801531765,
+      "version": 198,
+      "versionNonce": 743699291,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "Nz9gKlYjmgmOd2-2Zw8Uc"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "b1KwTxTlDaQPRq3R00obO",
+      "type": "rectangle",
+      "x": -32.5,
+      "y": 237.46666590372712,
+      "width": 190,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#FFE6CC",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_采样进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1674425947,
+      "version": 177,
+      "versionNonce": 1771815893,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "N7XfSuVCxyxv7-ZRtc53k"
+        },
+        {
+          "id": "mcEGUAH6NWGiDRDYoB0F1",
+          "type": "arrow"
+        },
+        {
+          "id": "HH2VQPZ8aTpIMC1vNrLWC",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "ascU_GMpJpw1Z3CZJ35QD",
+      "type": "rectangle",
+      "x": -45,
+      "y": 391.13333257039375,
+      "width": 215,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#FFE6CC",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_采样进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1372827861,
+      "version": 204,
+      "versionNonce": 1641205755,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "KjaQACsAAi7OGSFYcmQtB"
+        },
+        {
+          "id": "mcEGUAH6NWGiDRDYoB0F1",
+          "type": "arrow"
+        },
+        {
+          "id": "CA_GoSGQYXH7Y7O7qdzB7",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "4Gp8d9HlgWpsAf-NcN_hk",
+      "type": "rectangle",
+      "x": 419.75,
+      "y": 409.79999923706055,
+      "width": 115,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 723268347,
+      "version": 602,
+      "versionNonce": 1971224885,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "luahTH-A2ITv4Zl68CFqz"
+        },
+        {
+          "id": "n4_dZhJowzmsfqhDh4DTz",
+          "type": "arrow"
+        },
+        {
+          "id": "CA_GoSGQYXH7Y7O7qdzB7",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "RYPnW0OtDhmDT80qrBXto",
+      "type": "rectangle",
+      "x": 382.25,
+      "y": 504.79999923706055,
+      "width": 190,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1244712501,
+      "version": 597,
+      "versionNonce": 143464603,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "PEreEN38j7xZOeO4aYZlE"
+        },
+        {
+          "id": "n4_dZhJowzmsfqhDh4DTz",
+          "type": "arrow"
+        },
+        {
+          "id": "2YlqRYyk5YGDMJcGmxnPa",
+          "type": "arrow"
+        },
+        {
+          "id": "m8EnY4yFXRkgNQS1qe-wl",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "Y8kZnCCqvXa0Un8q2UsUq",
+      "type": "rectangle",
+      "x": 420.6624984741211,
+      "y": 605.7999982833862,
+      "width": 113.17500305175781,
+      "height": 43.79999923706055,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1219632027,
+      "version": 593,
+      "versionNonce": 1692570261,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "aTn0vtz1Nvqj-Ag3Ad-lY"
+        },
+        {
+          "id": "2YlqRYyk5YGDMJcGmxnPa",
+          "type": "arrow"
+        },
+        {
+          "id": "igONbl7-E5hmGdFm32KXA",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "jTYvTcnIQlkF4I6fL-U-x",
+      "type": "rectangle",
+      "x": 419.21428571428567,
+      "y": 698.1714270455498,
+      "width": 115,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1740849045,
+      "version": 649,
+      "versionNonce": 1043680571,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "gEnRC8roXCsZALuzxQxrA"
+        },
+        {
+          "id": "igONbl7-E5hmGdFm32KXA",
+          "type": "arrow"
+        },
+        {
+          "id": "FrNQYPNy_Enzvtcyy3vFp",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101383,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "Rmmm_8RJvz42iZGxh5t96",
+      "type": "rectangle",
+      "x": 745.3333333333334,
+      "y": 510.6666666666667,
+      "width": 190,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1489104955,
+      "version": 561,
+      "versionNonce": 1685944309,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "xbQHI-FjxX9BXzvwrAefG"
+        },
+        {
+          "id": "__ZGHFK1UId6Q0LpqJng3",
+          "type": "arrow"
+        },
+        {
+          "id": "m8EnY4yFXRkgNQS1qe-wl",
+          "type": "arrow"
+        },
+        {
+          "id": "rjdFyRK0rZeIH3A7bSv9f",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "8lnHU0LhhlGKItIX1te8D",
+      "type": "rectangle",
+      "x": 783.7458318074545,
+      "y": 609.6666657129924,
+      "width": 113.17500305175781,
+      "height": 43.79999923706055,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 12616949,
+      "version": 556,
+      "versionNonce": 1177415131,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "SL7OEYCGFcWBgwM4ntg4r"
+        },
+        {
+          "id": "__ZGHFK1UId6Q0LpqJng3",
+          "type": "arrow"
+        },
+        {
+          "id": "ldE9-_r8qpy_Z3_BlFWs7",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "8iWTe1pEl9_YdPuyz0T4P",
+      "type": "rectangle",
+      "x": 782.8333333333334,
+      "y": 699.4666659037273,
+      "width": 115,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1294872795,
+      "version": 555,
+      "versionNonce": 1851044181,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "3-2iHRJjbJRmZuQdgTjRz"
+        },
+        {
+          "id": "ldE9-_r8qpy_Z3_BlFWs7",
+          "type": "arrow"
+        },
+        {
+          "id": "9MQMmNcISBFQNqrO6OBws",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "ATOJVwBtgBCR1gbRCjJhk",
+      "type": "rectangle",
+      "x": 1181.3333333333335,
+      "y": 510.99999999999994,
+      "width": 190,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 145628757,
+      "version": 587,
+      "versionNonce": 1401518715,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "yW2UbVCzOWPEGSeSaQ2xl"
+        },
+        {
+          "id": "s7nb5C4gXfkHAkl2XSJW2",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "QrheeO_HJWvjNW2EaTQfi",
+      "type": "rectangle",
+      "x": 1219.7458318074546,
+      "y": 608.9999990463257,
+      "width": 113.17500305175781,
+      "height": 43.79999923706055,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 931749243,
+      "version": 585,
+      "versionNonce": 532528821,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "-ulnTUsL3Bp-9qnI91FWN"
+        },
+        {
+          "id": "s7nb5C4gXfkHAkl2XSJW2",
+          "type": "arrow"
+        },
+        {
+          "id": "nH3LvOWHdftfbQHe586-w",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "vdMpwWGMP8pJwn5pvDFL6",
+      "type": "rectangle",
+      "x": 1218.8333333333335,
+      "y": 699.7999992370605,
+      "width": 115,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1717668789,
+      "version": 584,
+      "versionNonce": 319451931,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "_SNQRHJeDribIOfQj-mlt"
+        },
+        {
+          "id": "nH3LvOWHdftfbQHe586-w",
+          "type": "arrow"
+        },
+        {
+          "id": "wUG_odvs_VZQUhnBWdwQB",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "vT3cvzFIQwlg57zz-7aPx",
+      "type": "rectangle",
+      "x": 746.5476190476195,
+      "y": 882.2761897132508,
+      "width": 165,
+      "height": 51,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#E8F5E8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1393948187,
+      "version": 598,
+      "versionNonce": 1331568661,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "jU_xgFIfujeHZyEr1ecUt"
+        },
+        {
+          "id": "FrNQYPNy_Enzvtcyy3vFp",
+          "type": "arrow"
+        },
+        {
+          "id": "9MQMmNcISBFQNqrO6OBws",
+          "type": "arrow"
+        },
+        {
+          "id": "HH2VQPZ8aTpIMC1vNrLWC",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "mcEGUAH6NWGiDRDYoB0F1",
+      "type": "arrow",
+      "x": 62.5,
+      "y": 288.4666666666665,
+      "width": 0,
+      "height": 96.36666666666667,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_采样进程"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 167791893,
+      "version": 462,
+      "versionNonce": 1965250491,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "r0re8j3gMw5AF4BvKuMhz"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0.5
+        ],
+        [
+          0,
+          43
+        ],
+        [
+          0,
+          96.86666666666667
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "b1KwTxTlDaQPRq3R00obO",
+        "focus": 0,
+        "gap": 1
+      },
+      "endBinding": {
+        "elementId": "ascU_GMpJpw1Z3CZJ35QD",
+        "focus": 0,
+        "gap": 5.799999237060547
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "n4_dZhJowzmsfqhDh4DTz",
+      "type": "arrow",
+      "x": 477.25,
+      "y": 462.29999923706055,
+      "width": 0,
+      "height": 36.20000076293945,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1321630395,
+      "version": 1737,
+      "versionNonce": 1663784309,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0.5
+        ],
+        [
+          0,
+          36.70000076293945
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "4Gp8d9HlgWpsAf-NcN_hk",
+        "focus": 0,
+        "gap": 1
+      },
+      "endBinding": {
+        "elementId": "RYPnW0OtDhmDT80qrBXto",
+        "focus": 0,
+        "gap": 5.799999237060547
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "2YlqRYyk5YGDMJcGmxnPa",
+      "type": "arrow",
+      "x": 477.25,
+      "y": 555.8,
+      "width": 0,
+      "height": 44.700000000000045,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1124065909,
+      "version": 1725,
+      "versionNonce": 938911835,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0.5
+        ],
+        [
+          0,
+          44.200000000000045
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "RYPnW0OtDhmDT80qrBXto",
+        "focus": 0,
+        "gap": 1
+      },
+      "endBinding": {
+        "elementId": "Y8kZnCCqvXa0Un8q2UsUq",
+        "focus": 0,
+        "gap": 5.7999982833862305
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "igONbl7-E5hmGdFm32KXA",
+      "type": "arrow",
+      "x": 477.75,
+      "y": 650.0999999999999,
+      "width": 1.4683281485079078,
+      "height": 44.834428571428816,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1463642971,
+      "version": 1897,
+      "versionNonce": 1718279893,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0.9285714285714448,
+          14.5
+        ],
+        [
+          -0.539756719936463,
+          44.834428571428816
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "Y8kZnCCqvXa0Un8q2UsUq",
+        "focus": 0.0161145622374742,
+        "gap": 1
+      },
+      "endBinding": {
+        "elementId": "jTYvTcnIQlkF4I6fL-U-x",
+        "focus": -0.015238918413393407,
+        "gap": 3.2369984741210374
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "__ZGHFK1UId6Q0LpqJng3",
+      "type": "arrow",
+      "x": 840.3333333333334,
+      "y": 563.1666666666667,
+      "width": 0,
+      "height": 40.200000000000045,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1445317589,
+      "version": 1629,
+      "versionNonce": 827778299,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0.5
+        ],
+        [
+          0,
+          40.700000000000045
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "Rmmm_8RJvz42iZGxh5t96",
+        "focus": 0,
+        "gap": 1.9999999999999716
+      },
+      "endBinding": {
+        "elementId": "8lnHU0LhhlGKItIX1te8D",
+        "focus": 0,
+        "gap": 5.799999046325638
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "ldE9-_r8qpy_Z3_BlFWs7",
+      "type": "arrow",
+      "x": 840.3333333333334,
+      "y": 654.466664950053,
+      "width": 0,
+      "height": 39.20000171661377,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1624066043,
+      "version": 1617,
+      "versionNonce": 1605516341,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          39.20000171661377
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "8lnHU0LhhlGKItIX1te8D",
+        "focus": 0,
+        "gap": 1
+      },
+      "endBinding": {
+        "elementId": "8iWTe1pEl9_YdPuyz0T4P",
+        "focus": 0,
+        "gap": 5.799999237060547
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "s7nb5C4gXfkHAkl2XSJW2",
+      "type": "arrow",
+      "x": 1276.3333333333335,
+      "y": 563,
+      "width": 0,
+      "height": 40.200000000000045,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1401391413,
+      "version": 1729,
+      "versionNonce": 1489407387,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          40.200000000000045
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "ATOJVwBtgBCR1gbRCjJhk",
+        "focus": 0,
+        "gap": 1
+      },
+      "endBinding": {
+        "elementId": "QrheeO_HJWvjNW2EaTQfi",
+        "focus": 0,
+        "gap": 5.799999046325638
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "nH3LvOWHdftfbQHe586-w",
+      "type": "arrow",
+      "x": 1276.3333333333335,
+      "y": 653.7999982833862,
+      "width": 0,
+      "height": 40.20000171661377,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 829984923,
+      "version": 1717,
+      "versionNonce": 1726410133,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          40.20000171661377
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "QrheeO_HJWvjNW2EaTQfi",
+        "focus": 0,
+        "gap": 1
+      },
+      "endBinding": {
+        "elementId": "vdMpwWGMP8pJwn5pvDFL6",
+        "focus": 0,
+        "gap": 5.799999237060547
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "wUG_odvs_VZQUhnBWdwQB",
+      "type": "arrow",
+      "x": 1277.0721499989645,
+      "y": 751.6571420942034,
+      "width": 368.1955317142846,
+      "height": 160.93885471669876,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1419470299,
+      "version": 1489,
+      "versionNonce": 423513173,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "jZzDQz9pN_YhLmUlcIlzw"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -96.0721499989645,
+          100.14285790579652
+        ],
+        [
+          -167.69119761801176,
+          158.57142933436808
+        ],
+        [
+          -368.1955317142846,
+          160.93885471669876
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "vdMpwWGMP8pJwn5pvDFL6",
+        "focus": -0.31751430307430545,
+        "gap": 1
+      },
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "Hrg1f_Fqh6MVeAEsolAZz",
+      "type": "text",
+      "x": 818,
+      "y": 182.14285714285688,
+      "width": 144,
+      "height": 45,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 629666427,
+      "version": 466,
+      "versionNonce": 280754613,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "训练进程",
+      "fontSize": 36,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "baseline": 32,
+      "containerId": "9YXVT_yQ3sKJyonIQxaUL",
+      "originalText": "训练进程",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "IWYPo0yJAN_A_rfOmEFzc",
+      "type": "text",
+      "x": 783.690055847168,
+      "y": 245.71428571428578,
+      "width": 202.61988830566406,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 242871067,
+      "version": 557,
+      "versionNonce": 1684105243,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "DeepSpeed分布式训练",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "baseline": 18,
+      "containerId": "IqWGC_IbS_ihXQ3oATxHi",
+      "originalText": "DeepSpeed分布式训练",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "4YXzAeqv9uJwbmeBsQFXT",
+      "type": "text",
+      "x": 1210.4133504231772,
+      "y": 484.99999999999994,
+      "width": 131.8399658203125,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1139003323,
+      "version": 681,
+      "versionNonce": 450689813,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "子进程Rank_n",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "baseline": 18,
+      "containerId": "7JxrCZi5OIDjZIzvWY8WY",
+      "originalText": "子进程Rank_n",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "hA8CcTZ9TlNajbSTBfhdv",
+      "type": "text",
+      "x": 776.3733495076498,
+      "y": 484.6666666666667,
+      "width": 127.91996765136719,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1206394971,
+      "version": 686,
+      "versionNonce": 1238609083,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "子进程Rank_1",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "baseline": 18,
+      "containerId": "diFnbV3gNvRkLXVwmu2Ij",
+      "originalText": "子进程Rank_1",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "cr3nacCM-p8fGnPwa0bnP",
+      "type": "text",
+      "x": 416.20335133870446,
+      "y": 383.79999923706055,
+      "width": 136.2599639892578,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 878271739,
+      "version": 734,
+      "versionNonce": 806801525,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "主进程Rank_0",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "baseline": 18,
+      "containerId": "tXiqeMkQr1mPSLb3Mmk5N",
+      "originalText": "主进程Rank_0",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "Nz9gKlYjmgmOd2-2Zw8Uc",
+      "type": "text",
+      "x": -9.5,
+      "y": 184.1333325703938,
+      "width": 144,
+      "height": 45,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_采样进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1153041819,
+      "version": 184,
+      "versionNonce": 500456795,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "采样进程",
+      "fontSize": 36,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "baseline": 32,
+      "containerId": "ZbNLlQuxkMBE5Gtcyh2SM",
+      "originalText": "采样进程",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "N7XfSuVCxyxv7-ZRtc53k",
+      "type": "text",
+      "x": -7.5,
+      "y": 250.46666590372712,
+      "width": 140,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_采样进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 540842555,
+      "version": 167,
+      "versionNonce": 506395093,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "旧策略模型采样",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "b1KwTxTlDaQPRq3R00obO",
+      "originalText": "旧策略模型采样",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "KjaQACsAAi7OGSFYcmQtB",
+      "type": "text",
+      "x": -17.5,
+      "y": 404.13333257039375,
+      "width": 160,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_采样进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1673763547,
+      "version": 201,
+      "versionNonce": 1538652667,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "参考策略模型采样",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "ascU_GMpJpw1Z3CZJ35QD",
+      "originalText": "参考策略模型采样",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "luahTH-A2ITv4Zl68CFqz",
+      "type": "text",
+      "x": 437.25,
+      "y": 422.79999923706055,
+      "width": 80,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1809942395,
+      "version": 698,
+      "versionNonce": 1580922677,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "数据接收",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "4Gp8d9HlgWpsAf-NcN_hk",
+      "originalText": "数据接收",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "PEreEN38j7xZOeO4aYZlE",
+      "type": "text",
+      "x": 407.25,
+      "y": 517.7999992370605,
+      "width": 140,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1591271451,
+      "version": 692,
+      "versionNonce": 1887109787,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "数据分割及广播",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "RYPnW0OtDhmDT80qrBXto",
+      "originalText": "数据分割及广播",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "aTn0vtz1Nvqj-Ag3Ad-lY",
+      "type": "text",
+      "x": 433.44004821777344,
+      "y": 615.1999979019165,
+      "width": 87.61990356445312,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1989944507,
+      "version": 692,
+      "versionNonce": 715147413,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "grpo loss",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "Y8kZnCCqvXa0Un8q2UsUq",
+      "originalText": "grpo loss",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "gEnRC8roXCsZALuzxQxrA",
+      "type": "text",
+      "x": 436.71428571428567,
+      "y": 711.1714270455498,
+      "width": 80,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_主进程Rank_0",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 181261659,
+      "version": 744,
+      "versionNonce": 81131323,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "反向传播",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "jTYvTcnIQlkF4I6fL-U-x",
+      "originalText": "反向传播",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "xbQHI-FjxX9BXzvwrAefG",
+      "type": "text",
+      "x": 770.3333333333334,
+      "y": 523.6666666666667,
+      "width": 140,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1522561531,
+      "version": 657,
+      "versionNonce": 1427402229,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "数据分割及广播",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "Rmmm_8RJvz42iZGxh5t96",
+      "originalText": "数据分割及广播",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "SL7OEYCGFcWBgwM4ntg4r",
+      "type": "text",
+      "x": 796.5233815511068,
+      "y": 619.0666653315227,
+      "width": 87.61990356445312,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 393640603,
+      "version": 655,
+      "versionNonce": 120149979,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "grpo loss",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "8lnHU0LhhlGKItIX1te8D",
+      "originalText": "grpo loss",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "3-2iHRJjbJRmZuQdgTjRz",
+      "type": "text",
+      "x": 800.3333333333334,
+      "y": 712.4666659037273,
+      "width": 80,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_1",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 765620027,
+      "version": 651,
+      "versionNonce": 1553786709,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "反向传播",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "8iWTe1pEl9_YdPuyz0T4P",
+      "originalText": "反向传播",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "yW2UbVCzOWPEGSeSaQ2xl",
+      "type": "text",
+      "x": 1206.3333333333335,
+      "y": 524,
+      "width": 140,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1336332251,
+      "version": 687,
+      "versionNonce": 1971823739,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "数据分割及广播",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "ATOJVwBtgBCR1gbRCjJhk",
+      "originalText": "数据分割及广播",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "-ulnTUsL3Bp-9qnI91FWN",
+      "type": "text",
+      "x": 1232.523381551107,
+      "y": 618.399998664856,
+      "width": 87.61990356445312,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1066802299,
+      "version": 684,
+      "versionNonce": 1133458613,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "grpo loss",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "QrheeO_HJWvjNW2EaTQfi",
+      "originalText": "grpo loss",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "_SNQRHJeDribIOfQj-mlt",
+      "type": "text",
+      "x": 1236.3333333333335,
+      "y": 712.7999992370605,
+      "width": 80,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_子进程Rank_n",
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1496503579,
+      "version": 681,
+      "versionNonce": 1739808027,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "反向传播",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "vdMpwWGMP8pJwn5pvDFL6",
+      "originalText": "反向传播",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "jU_xgFIfujeHZyEr1ecUt",
+      "type": "text",
+      "x": 769.0476190476195,
+      "y": 895.2761897132508,
+      "width": 120,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1542420923,
+      "version": 668,
+      "versionNonce": 630248981,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "目标策略模型",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "vT3cvzFIQwlg57zz-7aPx",
+      "originalText": "目标策略模型",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r0re8j3gMw5AF4BvKuMhz",
+      "type": "text",
+      "x": 22.5,
+      "y": 318.9666666666665,
+      "width": 80,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_采样进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1961790043,
+      "version": 167,
+      "versionNonce": 1495204283,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "采样轨迹",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "mcEGUAH6NWGiDRDYoB0F1",
+      "originalText": "采样轨迹",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "jZzDQz9pN_YhLmUlcIlzw",
+      "type": "text",
+      "x": 700.0591303931484,
+      "y": 355.1828950197731,
+      "width": 120,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 20336283,
+      "version": 42,
+      "versionNonce": 368054011,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "更新模型参数",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "wUG_odvs_VZQUhnBWdwQB",
+      "originalText": "更新模型参数",
+      "lineHeight": 1.25
+    },
+    {
+      "type": "arrow",
+      "version": 1873,
+      "versionNonce": 838881819,
+      "isDeleted": false,
+      "id": "FrNQYPNy_Enzvtcyy3vFp",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 475.67610098329453,
+      "y": 752.6126403611877,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "width": 268.28015773931884,
+      "height": 158.06393246400614,
+      "seed": 826181045,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "kh-ZmQQFBtiJJbjC2YeSU"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "startBinding": {
+        "elementId": "jTYvTcnIQlkF4I6fL-U-x",
+        "focus": 0.15498879941164645,
+        "gap": 3.441213315637924
+      },
+      "endBinding": {
+        "elementId": "vT3cvzFIQwlg57zz-7aPx",
+        "focus": -0.13254086077094399,
+        "gap": 2.5913603250061215
+      },
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          28.92785000103561,
+          91.80952457246315
+        ],
+        [
+          88.97546904865465,
+          156.90476266770133
+        ],
+        [
+          268.28015773931884,
+          158.06393246400614
+        ]
+      ]
+    },
+    {
+      "type": "text",
+      "version": 45,
+      "versionNonce": 712618261,
+      "isDeleted": false,
+      "id": "kh-ZmQQFBtiJJbjC2YeSU",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 1421.254177791116,
+      "y": 1145.1847118529695,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "width": 120,
+      "height": 25,
+      "seed": 590219029,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "fontSize": 20,
+      "fontFamily": 1,
+      "text": "更新模型参数",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "FrNQYPNy_Enzvtcyy3vFp",
+      "originalText": "更新模型参数",
+      "lineHeight": 1.25,
+      "baseline": 18
+    },
+    {
+      "id": "m8EnY4yFXRkgNQS1qe-wl",
+      "type": "arrow",
+      "x": 579.4764636811757,
+      "y": 536.6285226004466,
+      "width": 164.9999999999999,
+      "height": 3.333333333333485,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 2145634037,
+      "version": 104,
+      "versionNonce": 714485717,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          164.9999999999999,
+          -3.333333333333485
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "RYPnW0OtDhmDT80qrBXto",
+        "focus": 0.30612515761192605,
+        "gap": 7.226463681175687
+      },
+      "endBinding": {
+        "elementId": "Rmmm_8RJvz42iZGxh5t96",
+        "focus": 0.1753508940357842,
+        "gap": 1
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "version": 170,
+      "versionNonce": 352658427,
+      "isDeleted": false,
+      "id": "rjdFyRK0rZeIH3A7bSv9f",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 939.7537867404011,
+      "y": 535.7090889573984,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "width": 243.33333333333314,
+      "height": 3.3333333333333712,
+      "seed": 1115930811,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "startBinding": {
+        "elementId": "Rmmm_8RJvz42iZGxh5t96",
+        "focus": 0.03374254057269694,
+        "gap": 4.4204534070677255
+      },
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          243.33333333333314,
+          -3.3333333333333712
+        ]
+      ]
+    },
+    {
+      "id": "9MQMmNcISBFQNqrO6OBws",
+      "type": "arrow",
+      "x": 837.8892239106987,
+      "y": 751.6285226004464,
+      "width": 2.909578611049369,
+      "height": 128.33333333333337,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 124312731,
+      "version": 142,
+      "versionNonce": 72052021,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "CfABiexgIWmxhPmDAphOc"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          2.909578611049369,
+          128.33333333333337
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "8iWTe1pEl9_YdPuyz0T4P",
+        "focus": 0.047575801740762605,
+        "gap": 1.1618566967191555
+      },
+      "endBinding": {
+        "elementId": "vT3cvzFIQwlg57zz-7aPx",
+        "focus": 0.1490379013456475,
+        "gap": 2.314333779470985
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "CfABiexgIWmxhPmDAphOc",
+      "type": "text",
+      "x": 779.3440132162234,
+      "y": 803.2951892671131,
+      "width": 120,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1721450645,
+      "version": 29,
+      "versionNonce": 1247079579,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "更新模型参数",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "9MQMmNcISBFQNqrO6OBws",
+      "originalText": "更新模型参数",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "6W9qSDKUeMuEUXtI4yeOR",
+      "type": "text",
+      "x": 1020.1133397420246,
+      "y": 566.1095116024925,
+      "width": 79.76687622070312,
+      "height": 121.30988855073282,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "subgraph_group_DeepSpeed分布式训练",
+        "subgraph_group_训练进程"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "seed": 509053115,
+      "version": 93,
+      "versionNonce": 534946107,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "text": "...",
+      "fontSize": 97.04791084058625,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 85,
+      "containerId": null,
+      "originalText": "...",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "CA_GoSGQYXH7Y7O7qdzB7",
+      "type": "arrow",
+      "x": 172.14313034784243,
+      "y": 418.9618559337796,
+      "width": 244.9999999999999,
+      "height": 15,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1479917627,
+      "version": 169,
+      "versionNonce": 1040147445,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "KWq2Nd0oW5t2ahiXQwoSO"
+        }
+      ],
+      "updated": 1758006101384,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          83.33333333333337,
+          15
+        ],
+        [
+          244.9999999999999,
+          15
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "ascU_GMpJpw1Z3CZJ35QD",
+        "focus": -0.38812129541194623,
+        "gap": 2.1431303478424297
+      },
+      "endBinding": {
+        "elementId": "4Gp8d9HlgWpsAf-NcN_hk",
+        "focus": 0.05247620797180228,
+        "gap": 2.606869652157684
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "KWq2Nd0oW5t2ahiXQwoSO",
+      "type": "text",
+      "x": 198.80979701450906,
+      "y": 421.4618559337796,
+      "width": 80,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1642455509,
+      "version": 17,
+      "versionNonce": 789627355,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1758006101385,
+      "link": null,
+      "locked": false,
+      "text": "批次数据",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "baseline": 18,
+      "containerId": "CA_GoSGQYXH7Y7O7qdzB7",
+      "originalText": "批次数据",
+      "lineHeight": 1.25
+    },
+    {
+      "type": "arrow",
+      "version": 1687,
+      "versionNonce": 680576149,
+      "isDeleted": false,
+      "id": "HH2VQPZ8aTpIMC1vNrLWC",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 836.4804099195,
+      "y": 940.3844411514092,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "width": 969.7066666666665,
+      "height": 757.6449999999998,
+      "seed": 849341787,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "m5Bhe0Fqzmb4hn7ck69KW"
+        }
+      ],
+      "updated": 1758006196697,
+      "link": null,
+      "locked": false,
+      "startBinding": {
+        "elementId": "vT3cvzFIQwlg57zz-7aPx",
+        "focus": -0.3267497722857643,
+        "gap": 7.108251438158391
+      },
+      "endBinding": {
+        "elementId": "b1KwTxTlDaQPRq3R00obO",
+        "focus": 0.5664053055222009,
+        "gap": 1
+      },
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -58.039999999999736,
+          72.16666666666674
+        ],
+        [
+          -326.3733333333331,
+          78.49999999999977
+        ],
+        [
+          -684.7066666666665,
+          78.16666666666674
+        ],
+        [
+          -806.3733333333331,
+          81
+        ],
+        [
+          -873.0400000000001,
+          80.5
+        ],
+        [
+          -933.04,
+          75.00000000000023
+        ],
+        [
+          -964.7066666666665,
+          44.5
+        ],
+        [
+          -968.0399999999998,
+          -36.83333333333326
+        ],
+        [
+          -968.0400000000001,
+          -94.83333333333326
+        ],
+        [
+          -968.04,
+          -128.66666666666652
+        ],
+        [
+          -966.3733333333334,
+          -165.5
+        ],
+        [
+          -969.7066666666665,
+          -292.3333333333335
+        ],
+        [
+          -964.7066666666667,
+          -416.1666666666665
+        ],
+        [
+          -958.0400000000002,
+          -644.1666666666665
+        ],
+        [
+          -869.3433333333334,
+          -676.6449999999998
+        ]
+      ]
+    },
+    {
+      "type": "text",
+      "version": 10,
+      "versionNonce": 1089588859,
+      "isDeleted": false,
+      "id": "m5Bhe0Fqzmb4hn7ck69KW",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": -182.4900199870424,
+      "y": 1077.2645882978818,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "width": 120,
+      "height": 25,
+      "seed": 1888455163,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1758006101385,
+      "link": null,
+      "locked": false,
+      "fontSize": 20,
+      "fontFamily": 1,
+      "text": "更新模型参数",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "HH2VQPZ8aTpIMC1vNrLWC",
+      "originalText": "更新模型参数",
+      "lineHeight": 1.25,
+      "baseline": 18
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}

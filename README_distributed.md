@@ -213,3 +213,46 @@ python sampling_worker.py --gpu-id 1 --data-port 5555 --sync-port 5556
 ## 联系和支持
 
 如遇到问题，请检查日志输出并确保所有依赖项正确安装。可以根据具体的错误信息进行调试和修复。
+
+```mermaid
+graph TD
+    subgraph "采样进程"
+        OLD[旧策略模型采样] -- 采样轨迹 -->
+        REF[参考策略模型采样]
+    end
+
+    subgraph "训练进程"
+        subgraph "DeepSpeed分布式训练"
+            subgraph "主进程Rank_0"
+                R0_REC[数据接收] -->
+                R0_BRD[数据分割及广播] -->
+                R0_LOSS[grpo loss] -->
+                R0_BACK[反向传播]
+            end
+            subgraph "子进程Rank_1"
+                R1_BRD[数据分割及广播] -->
+                R1_LOSS[grpo loss] -->
+                R1_BACK[反向传播]
+            end
+            subgraph "子进程Rank_n"
+                RN_BRD[数据分割及广播] -->
+                RN_LOSS[grpo loss] -->
+                RN_BACK[反向传播]
+            end
+            NEW[目标策略模型]
+        end
+    end
+
+    REF -- 批次数据 --> R0_REC
+    R0_BACK -- 更新模型参数 --> NEW
+    R1_BACK -- 更新模型参数 --> NEW
+    RN_BACK -- 更新模型参数 --> NEW
+    NEW -- 定期同步参数 --> OLD
+
+    style 主进程Rank_0 fill:#E3F2FD,stroke-width:2px
+    style 子进程Rank_1 fill:#E3F2FD,stroke-width:2px
+    style 子进程Rank_n fill:#E3F2FD,stroke-width:2px
+    style OLD fill:#FFE6CC
+    style REF fill:#FFE6CC
+    style NEW fill:#E8F5E8
+```

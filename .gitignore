@@ -5,3 +5,5 @@ Qwen2.5-7B-Instruct/
 checkpoints/
 __pycache__/
 test.py
+README_distributed.md
+ds_config_bak.json
