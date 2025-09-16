@@ -16,9 +16,10 @@ from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.utils.data import DataLoader
 import torch.distributed as dist
-from data_types import Episode
-from utils import group_advantages, grpo_loss, train_accuracy, get_batch_log_probs
+from data_types import Gsm8kTasksDataset, Episode
+from utils import group_advantages, grpo_loss, train_accuracy, get_batch_log_probs, sample_trajectory, reward_function
 import deepspeed
 import numpy as np
 
@@ -37,6 +38,7 @@ class TrainingWorker:
         self.data_path = config["data"]["data_path"]
         self.max_gen_len = config["data"]["max_gen_len"]
         self.batch_size = config["training"]["batch_size"]
+        self.data_path = config["data"]["data_path"]
         self.num_answers_per_question = config["training"]["num_answers_per_question"]
         self.num_questions_per_batch = self.batch_size // self.num_answers_per_question
         self.zmq_data_port = config["communication"]["data_port"]
@@ -120,7 +122,7 @@ class TrainingWorker:
     def setup_zmq(self):
         """初始化ZeroMQ通信"""
         self.context = zmq.Context()
-        
+
         # 只有主进程(rank=0)连接ZMQ，避免多进程竞争
         if self.is_main_process:
             # 数据接收socket（PULL模式）
@@ -251,6 +253,46 @@ class TrainingWorker:
             self.scheduler.step()
 
         return loss
+
+    def evaluate(self):
+        '''
+        加载50个问题进行生成回答
+        每个问题需要格式和答案都正确才认为正确
+        '''
+        test_size = 100
+        test_dataset = Gsm8kTasksDataset(
+            data_path=self.data_path,
+            tokenizer=self.tokenizer,
+            split="test",
+            test_size=test_size
+        )
+        generator = torch.Generator(device="cpu")
+        test_dataloader = DataLoader(
+            test_dataset,
+            shuffle=True,
+            collate_fn=Gsm8kTasksDataset.collate_fn,
+            generator=generator,
+            batch_size=20
+        )
+        success_num = 0
+        for batch in test_dataloader:
+            episodes = sample_trajectory(
+                model=self.old_policy_model,
+                batch=batch,
+                tokenizer=self.tokenizer,
+                max_gen_len=self.max_gen_len,
+                num_answer_per_question=1,
+                reward_function=reward_function,
+                device=self.device,
+                dtype=self.dtype
+            )
+            success_num = 0
+            for episode in episodes:
+                if np.abs(episode.reward - 2.25) < 1e-3:
+                    success_num = success_num + 1
+        success_rate = success_num / test_size
+        return success_rate
+
 
     def save_checkpoint(self, train_step, loss):
         """保存模型检查点"""
