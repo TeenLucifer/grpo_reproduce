@@ -6,6 +6,7 @@ import re
 from typing import Any, Dict, List, Optional
 import time
 import numpy as np
+from fractions import Fraction
 
 def group_advantages(rewards: torch.Tensor, num_answers_per_question: int):
     batch_size = rewards.shape[0]
@@ -179,6 +180,16 @@ def format_reward_function(response: str) -> float:
 
     return reward
 
+def smart_float(s: str) -> float:
+    s = s.strip()
+    # 去掉千分位逗号
+    s = s.replace(",", "")
+    try:
+        # 尝试分数
+        return float(Fraction(s))
+    except ValueError:
+        # 普通数字
+        return float(s)
 
 def answer_reward_function(response: str, answer: str = None) -> float:
     """
@@ -199,8 +210,10 @@ def answer_reward_function(response: str, answer: str = None) -> float:
         return -1.0 # 答案中不包含数字, 奖励-1
     num = nums[-1]
 
-    answer_num = float(answer.replace(',', ''))
-    if abs(float(num) - float(answer_num)) < 1e-5:
+    #answer_num = float(answer.replace(',', ''))
+    truth_num = smart_float(answer)
+    reply_num = smart_float(num)
+    if abs(reply_num - truth_num) < 1e-5:
         return 1.0
 
     return -1.0 # 答案中数字不匹配, 奖励-1

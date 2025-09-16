@@ -16,7 +16,7 @@ from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, DistributedSampler
 import torch.distributed as dist
 from data_types import Gsm8kTasksDataset, Episode
 from utils import group_advantages, grpo_loss, train_accuracy, get_batch_log_probs, sample_trajectory, reward_function
@@ -38,6 +38,9 @@ class TrainingWorker:
         self.data_path = config["data"]["data_path"]
         self.max_gen_len = config["data"]["max_gen_len"]
         self.batch_size = config["training"]["batch_size"]
+        self.test_size = config["data"]["test_size"]
+        self.test_batch_size = config["training"]["test_batch_size"]
+        self.eval_interval = config["training"]["eval_interval"]
         self.data_path = config["data"]["data_path"]
         self.num_answers_per_question = config["training"]["num_answers_per_question"]
         self.num_questions_per_batch = self.batch_size // self.num_answers_per_question
@@ -255,44 +258,44 @@ class TrainingWorker:
         return loss
 
     def evaluate(self):
-        '''
-        加载50个问题进行生成回答
-        每个问题需要格式和答案都正确才认为正确
-        '''
-        test_size = 100
-        test_dataset = Gsm8kTasksDataset(
-            data_path=self.data_path,
-            tokenizer=self.tokenizer,
-            split="test",
-            test_size=test_size
-        )
-        generator = torch.Generator(device="cpu")
-        test_dataloader = DataLoader(
-            test_dataset,
-            shuffle=True,
-            collate_fn=Gsm8kTasksDataset.collate_fn,
-            generator=generator,
-            batch_size=20
-        )
-        success_num = 0
-        for batch in test_dataloader:
-            episodes = sample_trajectory(
-                model=self.old_policy_model,
-                batch=batch,
-                tokenizer=self.tokenizer,
-                max_gen_len=self.max_gen_len,
-                num_answer_per_question=1,
-                reward_function=reward_function,
-                device=self.device,
-                dtype=self.dtype
-            )
-            success_num = 0
-            for episode in episodes:
-                if np.abs(episode.reward - 2.25) < 1e-3:
-                    success_num = success_num + 1
-        success_rate = success_num / test_size
-        return success_rate
+        with torch.no_grad():
+            if self.use_deepspeed and self.model_engine is not None:
+                self.model_engine.module.eval() # 模型调整为评估模式
+                # 加载评估数据集
+                test_dataset = Gsm8kTasksDataset(
+                    data_path=self.data_path,
+                    tokenizer=self.tokenizer,
+                    split="test",
+                    test_size=self.test_size
+                )
+                generator = torch.Generator(device="cpu")
+                test_dataloader = DataLoader(
+                    test_dataset,
+                    shuffle=True,
+                    collate_fn=Gsm8kTasksDataset.collate_fn,
+                    generator=generator,
+                    batch_size=self.test_batch_size,
+                )
 
+                # 最新模型参数进行采样评估
+                success_num = 0
+                for batch in test_dataloader:
+                    episodes = sample_trajectory(
+                        model=self.model_engine.module,
+                        batch=batch,
+                        tokenizer=self.tokenizer,
+                        max_gen_len=self.max_gen_len,
+                        num_answer_per_question=1,
+                        reward_function=reward_function,
+                        device=self.device,
+                        dtype=self.dtype
+                    )
+                for episode in episodes:
+                    if np.abs(episode.reward - 2.25) < 1e-3:
+                        success_num = success_num + 1
+                success_rate = success_num / self.test_size
+                self.model_engine.module.train() # 模型调整回训练模式
+        return success_rate
 
     def save_checkpoint(self, train_step, loss):
         """保存模型检查点"""
@@ -361,8 +364,13 @@ class TrainingWorker:
                     # 定期同步模型参数（只有主进程需要同步到采样进程）
                     if self.is_main_process and train_step % self.sync_interval == 0:
                         output_file = self.ckpt_dir / self.ckpt_file
-                        torch.save(self.model_engine.state_dict(), output_file)
+                        torch.save(self.model_engine.module.state_dict(), output_file)
                         print(f"第 {train_step} 步训练后保存模型参数至 {output_file}")
+
+                    # 定期评估模型性能(只在主进程进行评估)
+                    if self.is_main_process and train_step % self.eval_interval == 0:
+                        accuracy = self.evaluate()
+                        print(f"第 {train_step} 步训练后评估模型性能, 准确率为 {accuracy}")
 
                     # 定期打印训练信息（只有主进程打印，避免重复输出）
                     if self.is_main_process and train_step % 10 == 0:
