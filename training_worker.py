@@ -49,7 +49,7 @@ class TrainingWorker:
         self.ds_config_path = config["deepspeed"]["config_path"]
         self.ckpt_dir = Path(config["checkpoint"]["ckpt_dir"])
         self.ckpt_file = config["checkpoint"]["ckpt_file"]
-        self.sync_interval = config["checkpoint"]["sync_interval"]
+        self.sync_interval = config["training"]["sync_interval"]
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
 
         # DeepSpeed多进程相关属性
@@ -279,6 +279,8 @@ class TrainingWorker:
 
                 # 最新模型参数进行采样评估
                 success_num = 0
+                format_success_num = 0
+                answer_success_num = 0
                 for batch in test_dataloader:
                     episodes = sample_trajectory(
                         model=self.model_engine.module,
@@ -290,12 +292,18 @@ class TrainingWorker:
                         device=self.device,
                         dtype=self.dtype
                     )
-                for episode in episodes:
-                    if np.abs(episode.reward - 2.25) < 1e-3:
-                        success_num = success_num + 1
+                    for episode in episodes:
+                        if np.abs(episode.reward_info["format_reward"] - 1.25) < 1e-3:
+                            format_success_num = format_success_num + 1
+                        if np.abs(episode.reward_info["answer_reward"] - 1.0) < 1e-3:
+                            answer_success_num = answer_success_num + 1
+                        if np.abs(episode.reward - 2.25) < 1e-3:
+                            success_num = success_num + 1
                 success_rate = success_num / self.test_size
+                format_success_rate = format_success_num / self.test_size
+                answer_success_rate = answer_success_num / self.test_size
                 self.model_engine.module.train() # 模型调整回训练模式
-        return success_rate
+        return success_rate, format_success_rate, answer_success_rate
 
     def save_checkpoint(self, train_step, loss):
         """保存模型检查点"""
@@ -324,6 +332,11 @@ class TrainingWorker:
         print(f"Rank {self.rank} 开始训练循环...")
         train_step = 0
 
+        # 评估原始模型的准确率
+        if self.is_main_process and train_step % self.eval_interval == 0:
+            eval_start_time = time.time()
+            accuracy, format_accuracy, answer_accuracy = self.evaluate()
+            print(f"第 {train_step} 步训练后评估模型性能, 准确率: {accuracy}, 格式准确率: {format_accuracy}, 回答准确率: {answer_accuracy}, 评估时间: {time.time() - eval_start_time:.2f}")
         try:
             while not self.stop_event.is_set():
                 try:
@@ -369,8 +382,9 @@ class TrainingWorker:
 
                     # 定期评估模型性能(只在主进程进行评估)
                     if self.is_main_process and train_step % self.eval_interval == 0:
-                        accuracy = self.evaluate()
-                        print(f"第 {train_step} 步训练后评估模型性能, 准确率为 {accuracy}")
+                        eval_start_time = time.time()
+                        accuracy, format_accuracy, answer_accuracy = self.evaluate()
+                        print(f"第 {train_step} 步训练后评估模型性能, 准确率: {accuracy}, 格式准确率: {format_accuracy}, 回答准确率: {answer_accuracy}, 评估时间: {time.time() - eval_start_time:.2f}")
 
                     # 定期打印训练信息（只有主进程打印，避免重复输出）
                     if self.is_main_process and train_step % 10 == 0:
@@ -382,8 +396,8 @@ class TrainingWorker:
                         print(f"训练步骤 {train_step}, Loss: {loss.item():.4f}, LR: {current_lr:.2e}, F_Acc: {format_accuracy}, A_acc: {answer_accuracy}")
 
                     # 定期保存检查点（只有主进程保存）
-                    if self.is_main_process:
-                        self.save_checkpoint(train_step, loss)
+                    #if self.is_main_process:
+                    #    self.save_checkpoint(train_step, loss)
 
                 except zmq.Again:
                     # 没有数据，继续循环
