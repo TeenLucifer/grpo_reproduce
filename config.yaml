@@ -10,47 +10,33 @@ model:
 data:
   data_path: "./gsm8k"
   max_gen_len: 700
-  split: "train"
   test_size: 100
-
-sampling:
-  batch_size: 8
-  num_answers_per_question: 4
+  sample_batch_size: 8 # 采样批次大小
+  train_batch_size: 4  # 单进程训练批次大小
+  test_batch_size: 20  # 评估平次大小
+  num_answers_per_question: 4 # 每个问题组内采样数量
 
 # 训练配置
 training:
-  batch_size: 4
-  num_answers_per_question: 4  # batch_size // num_questions_per_batch
   learning_rate: 1e-5
   weight_decay: 0.01
   max_grad_norm: 1.0
   sync_interval: 10  # 模型同步间隔（训练步数）
-  test_batch_size: 20
-  eval_interval: 10
+  eval_interval: 10  # 模型评估间隔
 
 # ZeroMQ通信配置
 communication:
-  data_port: 5555      # 数据传输端口
+  data_port: 5555      # 训练数据传输端口
   timeout: 100         # 通信超时时间（毫秒）
 
 # DeepSpeed配置
 deepspeed:
-  enabled: true
   config_path: "./ds_config.json"
-  train_batch_size: 16
-  train_micro_batch_size_per_gpu: 4
-  gradient_accumulation_steps: 1
-  
-# 日志配置
-logging:
-  log_interval: 10     # 训练日志打印间隔
-  checkpoint_interval: 1000  # 检查点保存间隔
-  sample_log_interval: 100   # 采样日志打印间隔
 
 # GPU配置
 gpu:
   sampling_gpu: 2      # 采样进程使用的GPU
-  training_gpu: 1  # 训练进程使用的GPU列表
+  training_gpu: [0, 1]  # 训练进程使用的GPU列表
 
 # 检查点配置
 checkpoint:

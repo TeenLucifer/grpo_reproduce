@@ -4,6 +4,8 @@ Qwen2.5-3B-Instruct/
 Qwen2.5-7B-Instruct/
 checkpoints/
 __pycache__/
+logs/
 test.py
 README_distributed.md
 ds_config_bak.json
+start_training.sh

@@ -69,7 +69,7 @@ Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
 * 参考模型: qwen2.5-3B-Instruct
 * 目标模型: qwen2.5-1.5B-Instruct
 * 硬件配置: 3 × AutoDL vGPU-32G (GPU0/1用于训练, GPU2用于采样)
-* 训练步数: 200 steps
+* 训练步数: 200 steps (60min)
 
 ### 训练结果
 ![全量微调准确率曲线](./docs/train_accuracy.png)

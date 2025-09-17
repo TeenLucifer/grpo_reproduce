@@ -4,7 +4,6 @@
 通过ZeroMQ接收采样进程的数据，支持DeepSpeed分布式训练
 """
 
-import os
 import time
 import torch
 import zmq
@@ -14,9 +13,7 @@ import pickle
 import threading
 from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from torch.optim import AdamW
-from torch.optim.lr_scheduler import CosineAnnealingLR
-from torch.utils.data import DataLoader, DistributedSampler
+from torch.utils.data import DataLoader
 import torch.distributed as dist
 from data_types import Gsm8kTasksDataset, Episode
 from utils import group_advantages, grpo_loss, train_accuracy, get_batch_log_probs, sample_trajectory, reward_function
@@ -37,15 +34,15 @@ class TrainingWorker:
         self.dtype = dtype_map.get(config["model"]["dtype"], torch.bfloat16)
         self.data_path = config["data"]["data_path"]
         self.max_gen_len = config["data"]["max_gen_len"]
-        self.batch_size = config["training"]["batch_size"]
+        self.train_batch_size = config["data"]["train_batch_size"]
+        self.sample_batch_size = config["data"]["sample_batch_size"]
         self.test_size = config["data"]["test_size"]
-        self.test_batch_size = config["training"]["test_batch_size"]
+        self.test_batch_size = config["data"]["test_batch_size"]
         self.eval_interval = config["training"]["eval_interval"]
         self.data_path = config["data"]["data_path"]
-        self.num_answers_per_question = config["training"]["num_answers_per_question"]
-        self.num_questions_per_batch = self.batch_size // self.num_answers_per_question
+        self.num_answers_per_question = config["data"]["num_answers_per_question"]
+        self.num_questions_per_batch = self.train_batch_size // self.num_answers_per_question
         self.zmq_data_port = config["communication"]["data_port"]
-        self.use_deepspeed = config["deepspeed"]["enabled"]
         self.ds_config_path = config["deepspeed"]["config_path"]
         self.ckpt_dir = Path(config["checkpoint"]["ckpt_dir"])
         self.ckpt_file = config["checkpoint"]["ckpt_file"]
@@ -75,48 +72,41 @@ class TrainingWorker:
         self.tokenizer = AutoTokenizer.from_pretrained(self.pretrained_model_path, padding_side='left')
 
         # DeepSpeed配置和初始化
-        if self.use_deepspeed:
-            print("正在使用DeepSpeed进行优化训练...")
+        print("正在使用DeepSpeed进行优化训练...")
 
-            dist.init_process_group(backend='gloo')  # autodl的vgpu没法用nccl通信, 需要设置为gloo
+        dist.init_process_group(backend='gloo')  # autodl的vgpu没法用nccl通信, 需要设置为gloo
 
-            # 获取当前进程的rank和world_size
-            self.rank = dist.get_rank()
-            self.world_size = dist.get_world_size()
-            self.is_main_process = (self.rank == 0)
+        # 获取当前进程的rank和world_size
+        self.rank = dist.get_rank()
+        self.world_size = dist.get_world_size()
+        self.is_main_process = (self.rank == 0)
 
-            print(f"DeepSpeed进程初始化 - Rank: {self.rank}, World Size: {self.world_size}, Is Main Process: {self.is_main_process}")
+        print(f"DeepSpeed进程初始化 - Rank: {self.rank}, World Size: {self.world_size}, Is Main Process: {self.is_main_process}")
 
-            # 加载DeepSpeed配置
-            try:
-                with open(self.ds_config_path, 'r') as f:
-                    ds_config = json.load(f)
-                print(f"成功加载DeepSpeed配置: {self.ds_config_path}")
-            except FileNotFoundError:
-                print(f"警告: DeepSpeed配置文件 {self.ds_config_path}")
-                raise
-            except json.JSONDecodeError as e:
-                print(f"错误: DeepSpeed配置文件格式错误: {e}")
-                raise
+        # 加载DeepSpeed配置
+        try:
+            with open(self.ds_config_path, 'r') as f:
+                ds_config = json.load(f)
+            print(f"成功加载DeepSpeed配置: {self.ds_config_path}")
+        except FileNotFoundError:
+            print(f"警告: DeepSpeed配置文件 {self.ds_config_path}")
+            raise
+        except json.JSONDecodeError as e:
+            print(f"错误: DeepSpeed配置文件格式错误: {e}")
+            raise
 
-            # 加载模型参数
-            model_parameters = list(self.new_policy_model.parameters())
+        # 加载模型参数
+        model_parameters = list(self.new_policy_model.parameters())
 
-            # 初始化DeepSpeed引擎
-            self.model_engine, self.optimizer, _, self.scheduler = deepspeed.initialize(
-                model=self.new_policy_model,
-                model_parameters=model_parameters,
-                config=ds_config
-            )
+        # 初始化DeepSpeed引擎
+        self.model_engine, self.optimizer, _, self.scheduler = deepspeed.initialize(
+            model=self.new_policy_model,
+            model_parameters=model_parameters,
+            config=ds_config
+        )
 
-            self.device=self.model_engine.device
-            print(f"DeepSpeed初始化完成，世界大小: {self.model_engine.world_size}")
-        else:
-            # 原有的优化器和调度器
-            self.optimizer = AdamW(self.new_policy_model.parameters(), lr=1e-5, weight_decay=0.01)
-            self.scheduler = CosineAnnealingLR(self.optimizer, T_max=1000, eta_min=1e-6)
-            self.model_engine = None
-            self.device = torch.device(f'cuda:{self.gpu_id}' if torch.cuda.is_available() else 'cpu')
+        self.device=self.model_engine.device
+        print(f"DeepSpeed初始化完成，世界大小: {self.model_engine.world_size}")
 
         # 梯度裁剪参数
         self.max_grad_norm = 1.0
@@ -164,7 +154,7 @@ class TrainingWorker:
 
     def broadcast_episodes(self, episodes):
         """将episodes数据从rank=0广播到所有其他rank"""
-        if self.use_deepspeed and self.world_size > 1:
+        if self.world_size > 1:
             if self.is_main_process:
                 serialized_data = pickle.dumps(episodes)
                 np_data = np.frombuffer(serialized_data, dtype=np.uint8)
@@ -209,20 +199,12 @@ class TrainingWorker:
         batch_token_ids = torch.tensor([episode.whole_token_ids for episode in episodes], dtype=torch.long, device=self.device)
         attention_mask = (batch_token_ids != self.tokenizer.pad_token_id).long()
 
-        if self.use_deepspeed and self.model_engine is not None:
-            new_policy_log_probs = get_batch_log_probs(
-                model=self.model_engine,
-                batch_token_ids=batch_token_ids,
-                attention_mask=attention_mask,
-                enable_grad=True  # 新策略训练，需要梯度
-            )
-        else:
-            new_policy_log_probs = get_batch_log_probs(
-                model=self.new_policy_model,
-                batch_token_ids=batch_token_ids,
-                attention_mask=attention_mask,
-                enable_grad=True  # 新策略训练，需要梯度
-            )
+        new_policy_log_probs = get_batch_log_probs(
+            model=self.model_engine,
+            batch_token_ids=batch_token_ids,
+            attention_mask=attention_mask,
+            enable_grad=True  # 新策略训练，需要梯度
+        )
 
         # 计算优势函数
         rewards = torch.tensor([episode.reward for episode in episodes], dtype=self.dtype, device=self.device)
@@ -242,90 +224,57 @@ class TrainingWorker:
         )
 
         # 反向传播和优化步骤
-        if self.use_deepspeed and self.model_engine is not None:
-            # DeepSpeed优化步骤
-            self.model_engine.backward(loss)
-            self.model_engine.step()
-        else:
-            # 原有优化步骤
-            self.optimizer.zero_grad()
-            loss.backward()
-            # 梯度裁剪
-            torch.nn.utils.clip_grad_norm_(self.new_policy_model.parameters(), self.max_grad_norm)
-            self.optimizer.step()
-            self.scheduler.step()
+        self.model_engine.backward(loss)
+        self.model_engine.step()
 
         return loss
 
     def evaluate(self):
         with torch.no_grad():
-            if self.use_deepspeed and self.model_engine is not None:
-                self.model_engine.module.eval() # 模型调整为评估模式
-                # 加载评估数据集
-                test_dataset = Gsm8kTasksDataset(
-                    data_path=self.data_path,
+            self.model_engine.module.eval() # 模型调整为评估模式
+            # 加载评估数据集
+            test_dataset = Gsm8kTasksDataset(
+                data_path=self.data_path,
+                tokenizer=self.tokenizer,
+                split="test",
+                test_size=self.test_size
+            )
+            generator = torch.Generator(device="cpu")
+            test_dataloader = DataLoader(
+                test_dataset,
+                shuffle=True,
+                collate_fn=Gsm8kTasksDataset.collate_fn,
+                generator=generator,
+                batch_size=self.test_batch_size,
+            )
+
+            # 最新模型参数进行采样评估
+            success_num = 0
+            format_success_num = 0
+            answer_success_num = 0
+            for batch in test_dataloader:
+                episodes = sample_trajectory(
+                    model=self.model_engine.module,
+                    batch=batch,
                     tokenizer=self.tokenizer,
-                    split="test",
-                    test_size=self.test_size
+                    max_gen_len=self.max_gen_len,
+                    num_answer_per_question=1,
+                    reward_function=reward_function,
+                    device=self.device,
+                    dtype=self.dtype
                 )
-                generator = torch.Generator(device="cpu")
-                test_dataloader = DataLoader(
-                    test_dataset,
-                    shuffle=True,
-                    collate_fn=Gsm8kTasksDataset.collate_fn,
-                    generator=generator,
-                    batch_size=self.test_batch_size,
-                )
-
-                # 最新模型参数进行采样评估
-                success_num = 0
-                format_success_num = 0
-                answer_success_num = 0
-                for batch in test_dataloader:
-                    episodes = sample_trajectory(
-                        model=self.model_engine.module,
-                        batch=batch,
-                        tokenizer=self.tokenizer,
-                        max_gen_len=self.max_gen_len,
-                        num_answer_per_question=1,
-                        reward_function=reward_function,
-                        device=self.device,
-                        dtype=self.dtype
-                    )
-                    for episode in episodes:
-                        if np.abs(episode.reward_info["format_reward"] - 1.25) < 1e-3:
-                            format_success_num = format_success_num + 1
-                        if np.abs(episode.reward_info["answer_reward"] - 1.0) < 1e-3:
-                            answer_success_num = answer_success_num + 1
-                        if np.abs(episode.reward - 2.25) < 1e-3:
-                            success_num = success_num + 1
-                success_rate = success_num / self.test_size
-                format_success_rate = format_success_num / self.test_size
-                answer_success_rate = answer_success_num / self.test_size
-                self.model_engine.module.train() # 模型调整回训练模式
+                for episode in episodes:
+                    if np.abs(episode.reward_info["format_reward"] - 1.25) < 1e-3:
+                        format_success_num = format_success_num + 1
+                    if np.abs(episode.reward_info["answer_reward"] - 1.0) < 1e-3:
+                        answer_success_num = answer_success_num + 1
+                    if np.abs(episode.reward - 2.25) < 1e-3:
+                        success_num = success_num + 1
+            success_rate = success_num / self.test_size
+            format_success_rate = format_success_num / self.test_size
+            answer_success_rate = answer_success_num / self.test_size
+            self.model_engine.module.train() # 模型调整回训练模式
         return success_rate, format_success_rate, answer_success_rate
-
-    def save_checkpoint(self, train_step, loss):
-        """保存模型检查点"""
-        if train_step % 100 == 0:
-            if self.use_deepspeed and self.model_engine is not None:
-                # DeepSpeed检查点保存
-                checkpoint_path = f"./checkpoints/deepspeed_model_step_{train_step}"
-                os.makedirs("./checkpoints", exist_ok=True)
-                self.model_engine.save_checkpoint(checkpoint_path, tag=f"step_{train_step}")
-                print(f"DeepSpeed模型检查点已保存: {checkpoint_path}")
-            else:
-                # 原有检查点保存
-                checkpoint_path = f"./checkpoints/model_step_{train_step}.pt"
-                os.makedirs("./checkpoints", exist_ok=True)
-                torch.save({
-                    'step': train_step,
-                    'model_state_dict': self.new_policy_model.state_dict(),
-                    'optimizer_state_dict': self.optimizer.state_dict(),
-                    'scheduler_state_dict': self.scheduler.state_dict(),
-                    'loss': loss.item(),
-                }, checkpoint_path)
-                print(f"模型检查点已保存: {checkpoint_path}")
 
     def run(self):
         """主运行循环"""
@@ -359,7 +308,7 @@ class TrainingWorker:
                             continue
 
                     # 广播数据到所有rank
-                    if self.use_deepspeed and self.world_size > 1:
+                    if self.world_size > 1:
                         episodes = self.broadcast_episodes(episodes)
 
                     # 如果所有rank都没有数据，继续循环
@@ -389,15 +338,8 @@ class TrainingWorker:
                     # 定期打印训练信息（只有主进程打印，避免重复输出）
                     if self.is_main_process and train_step % 10 == 0:
                         format_accuracy, answer_accuracy = train_accuracy(episodes=episodes)
-                        if self.use_deepspeed and self.model_engine is not None:
-                            current_lr = self.model_engine.get_lr()[0]
-                        else:
-                            current_lr = self.scheduler.get_last_lr()[0]
+                        current_lr = self.model_engine.get_lr()[0]
                         print(f"训练步骤 {train_step}, Loss: {loss.item():.4f}, LR: {current_lr:.2e}, F_Acc: {format_accuracy}, A_acc: {answer_accuracy}")
-
-                    # 定期保存检查点（只有主进程保存）
-                    #if self.is_main_process:
-                    #    self.save_checkpoint(train_step, loss)
 
                 except zmq.Again:
                     # 没有数据，继续循环
@@ -445,8 +387,7 @@ def main():
 
     print("=== GRPO训练进程 ===")
     print(f"数据端口: {config["communication"]["data_port"]}")
-    print(f"同步端口: {config["communication"]["sync_port"]}")
-    print(f"DeepSpeed: {'启用' if config["deepspeed"]["enabled"] else '禁用'}")
+    print(f"DeepSpeed: 启用")
     print(f"当前进程: Rank {worker.rank}/{worker.world_size-1}, 主进程: {worker.is_main_process}")
 
     print("初始化成功")

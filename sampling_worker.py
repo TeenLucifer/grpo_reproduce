@@ -11,11 +11,10 @@ import zmq
 import yaml
 import pickle
 import threading
-from collections import deque
 from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from torch.utils.data import DataLoader
-from data_types import Gsm8kTasksDataset, Episode
+from data_types import Gsm8kTasksDataset
 from utils import sample_trajectory, reward_function, get_batch_log_probs, update_old_policy
 
 class SamplingWorker:
@@ -32,12 +31,12 @@ class SamplingWorker:
         self.dtype = dtype_map.get(config["model"]["dtype"], torch.bfloat16)
         self.data_path = config["data"]["data_path"]
         self.max_gen_len = config["data"]["max_gen_len"]
-        self.train_batch_size = config["training"]["batch_size"]
-        self.batch_size = config["sampling"]["batch_size"]
-        self.num_answers_per_question = config["sampling"]["num_answers_per_question"]
-        self.num_questions_per_batch = self.batch_size // self.num_answers_per_question
+        self.test_size = config["data"]["test_size"]
+        self.train_batch_size = config["data"]["train_batch_size"]
+        self.sample_batch_size = config["data"]["sample_batch_size"]
+        self.num_answers_per_question = config["data"]["num_answers_per_question"]
+        self.num_questions_per_batch = self.sample_batch_size // self.num_answers_per_question
         self.zmq_data_port = config["communication"]["data_port"]
-        self.use_deepspeed = config["deepspeed"]["enabled"]
         self.ckpt_dir = Path(config["checkpoint"]["ckpt_dir"])
         self.ckpt_file = config["checkpoint"]["ckpt_file"]
 
@@ -87,7 +86,7 @@ class SamplingWorker:
             data_path=self.data_path,
             tokenizer=self.tokenizer,
             split="train",
-            test_size=100
+            test_size=self.test_size
         )
         generator = torch.Generator(device="cpu")
         self.train_dataloader = DataLoader(
@@ -197,7 +196,7 @@ class SamplingWorker:
 
                 rewards = [episode.reward for episode in episodes]
                 sample_count += 1
-                print(f"{time.time() - last_sample_time:.2f}s, 采样{self.batch_size}条数据, {self.num_questions_per_batch}个问题, 奖励为: {rewards}")
+                print(f"{time.time() - last_sample_time:.2f}s, 采样{self.sample_batch_size}条数据, {self.num_questions_per_batch}个问题, 奖励为: {rewards}")
                 last_sample_time = time.time()
 
                 if sample_count % 10 == 0:
@@ -209,9 +208,8 @@ class SamplingWorker:
                         try:
                             checkpoint = torch.load(ckpt_path, map_location=self.device, weights_only=True)
                             state_dict = checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint
-                            if self.use_deepspeed:
-                                # deepspeed保存的模型参数key有module前缀, 加载时需要移除module, 否则键不匹配
-                                state_dict = {k.replace('module.', '', 1): v for k, v in state_dict.items()}
+                            # deepspeed保存的模型参数key有module前缀, 加载时需要移除module, 否则键不匹配
+                            state_dict = {k.replace('module.', '', 1): v for k, v in state_dict.items()}
                             self.old_policy_model.load_state_dict(state_dict)
                             print(f"成功更新最新模型参数: {ckpt_path}")
                         except Exception as e:
@@ -251,7 +249,6 @@ def main():
     print("=== GRPO采样进程 ===")
     print(f"GPU ID: {config["gpu"]["sampling_gpu"]}")
     print(f"数据端口: {config["communication"]["data_port"]}")
-    print(f"同步端口: {config["communication"]["sync_port"]}")
 
     # 创建并运行采样进程
     worker = SamplingWorker(config)
