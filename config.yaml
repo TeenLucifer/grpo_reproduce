@@ -42,3 +42,10 @@ gpu:
 checkpoint:
   ckpt_dir: "./checkpoints"
   ckpt_file: "ckpt.pt"
+
+# LoRA配置
+lora:
+  enabled: true
+  adapter_dir: "./lora_adapter"
+  rank: 32
+  alpha: 64

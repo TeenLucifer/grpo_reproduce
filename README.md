@@ -90,7 +90,7 @@ git clone https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct
 # Qwen2.5-3B-Instruct模型下载
 git clone https://huggingface.co/Qwen/Qwen2.5-3B-Instruct
 # 启动采样进程
-python sampling.py
+python sampling_worker.py
 # 启动训练进程
 CUDA_VISIBLE_DEVICES=0,1 deepspeed --num_gpus=2 training_worker.py
 ```

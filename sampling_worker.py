@@ -16,6 +16,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from torch.utils.data import DataLoader
 from data_types import Gsm8kTasksDataset
 from utils import sample_trajectory, reward_function, get_batch_log_probs, update_old_policy
+from peft import PeftModel
 
 class SamplingWorker:
     def __init__(self, config: dict):
@@ -39,6 +40,8 @@ class SamplingWorker:
         self.zmq_data_port = config["communication"]["data_port"]
         self.ckpt_dir = Path(config["checkpoint"]["ckpt_dir"])
         self.ckpt_file = config["checkpoint"]["ckpt_file"]
+        self.use_lora = config["lora"]["enabled"]
+        self.lora_adapter_dir = Path(config["lora"]["adapter_dir"])
 
         self.device = torch.device(f'cuda:{self.gpu_id}' if torch.cuda.is_available() else 'cpu')
         self.setup_models()
@@ -200,20 +203,32 @@ class SamplingWorker:
                 last_sample_time = time.time()
 
                 if sample_count % 10 == 0:
-                    print(f"采样进程已采样 {sample_count} 批数据, 并尝试加载最新模型参数")
-                    ckpt_path = self.ckpt_dir / self.ckpt_file
-                    if not ckpt_path:
-                        print(f"最新模型参数不存在, 跳过")
+                    if self.use_lora:
+                        print(f"采样进程已采样 {sample_count} 批数据, 并尝试加载最新LoRA模型参数")
+                        if not self.lora_adapter_dir:
+                            print(f"最新LoRA模型参数不存在, 跳过")
+                        else:
+                            try:
+                                self.old_policy_model = PeftModel.from_pretrained(self.old_policy_model, self.lora_adapter_dir, is_trainable=False)
+                                self.old_policy_model.eval()
+                                print(f"成功更新最新LoRA模型参数: {self.lora_adapter_dir}")
+                            except Exception as e:
+                                print(f"加载最新LoRA模型参数失败: {self.lora_adapter_dir}, 错误: {e}")
                     else:
-                        try:
-                            checkpoint = torch.load(ckpt_path, map_location=self.device, weights_only=True)
-                            state_dict = checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint
-                            # deepspeed保存的模型参数key有module前缀, 加载时需要移除module, 否则键不匹配
-                            state_dict = {k.replace('module.', '', 1): v for k, v in state_dict.items()}
-                            self.old_policy_model.load_state_dict(state_dict)
-                            print(f"成功更新最新模型参数: {ckpt_path}")
-                        except Exception as e:
-                            print(f"加载最新模型参数失败: {ckpt_path}, 错误: {e}")
+                        print(f"采样进程已采样 {sample_count} 批数据, 并尝试加载最新全量模型参数")
+                        ckpt_path = self.ckpt_dir / self.ckpt_file
+                        if not ckpt_path:
+                            print(f"最新全量模型参数不存在, 跳过")
+                        else:
+                            try:
+                                checkpoint = torch.load(ckpt_path, map_location=self.device, weights_only=True)
+                                state_dict = checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint
+                                # deepspeed保存的模型参数key有module前缀, 加载时需要移除module, 否则键不匹配
+                                state_dict = {k.replace('module.', '', 1): v for k, v in state_dict.items()}
+                                self.old_policy_model.load_state_dict(state_dict)
+                                print(f"成功更新最新全量模型参数: {ckpt_path}")
+                            except Exception as e:
+                                print(f"加载最新全量模型参数失败: {ckpt_path}, 错误: {e}")
 
                 # 短暂休眠避免CPU占用过高
                 time.sleep(0.01)

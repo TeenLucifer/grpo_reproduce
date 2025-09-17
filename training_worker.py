@@ -19,6 +19,7 @@ from data_types import Gsm8kTasksDataset, Episode
 from utils import group_advantages, grpo_loss, train_accuracy, get_batch_log_probs, sample_trajectory, reward_function
 import deepspeed
 import numpy as np
+from peft import LoraConfig, get_peft_model
 
 class TrainingWorker:
     def __init__(self, config: dict):
@@ -38,16 +39,21 @@ class TrainingWorker:
         self.sample_batch_size = config["data"]["sample_batch_size"]
         self.test_size = config["data"]["test_size"]
         self.test_batch_size = config["data"]["test_batch_size"]
-        self.eval_interval = config["training"]["eval_interval"]
         self.data_path = config["data"]["data_path"]
         self.num_answers_per_question = config["data"]["num_answers_per_question"]
         self.num_questions_per_batch = self.train_batch_size // self.num_answers_per_question
+        self.eval_interval = config["training"]["eval_interval"]
+        self.sync_interval = config["training"]["sync_interval"]
         self.zmq_data_port = config["communication"]["data_port"]
         self.ds_config_path = config["deepspeed"]["config_path"]
         self.ckpt_dir = Path(config["checkpoint"]["ckpt_dir"])
         self.ckpt_file = config["checkpoint"]["ckpt_file"]
-        self.sync_interval = config["training"]["sync_interval"]
+        self.use_lora = config["lora"]["enabled"]
+        self.lora_rank = config["lora"]["rank"]
+        self.lora_alpha = config["lora"]["alpha"]
+        self.lora_adapter_dir = Path(config["lora"]["adapter_dir"])
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
+        self.lora_adapter_dir.mkdir(parents=True, exist_ok=True)
 
         # DeepSpeed多进程相关属性
         self.rank = 0
@@ -94,6 +100,18 @@ class TrainingWorker:
         except json.JSONDecodeError as e:
             print(f"错误: DeepSpeed配置文件格式错误: {e}")
             raise
+
+        if self.use_lora:
+            # LoRA配置和初始化
+            lora_config = LoraConfig(
+                r=32,
+                lora_alpha=32,
+                garget_modules="q_proj,v_proj,k_proj,o_proj,gate_proj,down_proj,up_proj".split(","),
+                lora_dpoout=0.1,
+                bias="none",
+                task_type="CAUSAL_LM"
+            )
+            self.new_policy_model = get_peft_model(self.new_policy_model, lora_config)
 
         # 加载模型参数
         model_parameters = list(self.new_policy_model.parameters())
@@ -325,9 +343,13 @@ class TrainingWorker:
 
                     # 定期同步模型参数（只有主进程需要同步到采样进程）
                     if self.is_main_process and train_step % self.sync_interval == 0:
-                        output_file = self.ckpt_dir / self.ckpt_file
-                        torch.save(self.model_engine.module.state_dict(), output_file)
-                        print(f"第 {train_step} 步训练后保存模型参数至 {output_file}")
+                        if self.use_lora:
+                            self.model_engine.save_pretrained(self.lora_adapter_dir)
+                            print(f"第 {train_step} 步训练后保存LoRA模型参数至 {self.lora_adapter_dir}")
+                        else:
+                            output_file = self.ckpt_dir / self.ckpt_file
+                            torch.save(self.model_engine.module.state_dict(), output_file)
+                            print(f"第 {train_step} 步训练后保存全量模型参数至 {output_file}")
 
                     # 定期评估模型性能(只在主进程进行评估)
                     if self.is_main_process and train_step % self.eval_interval == 0:
