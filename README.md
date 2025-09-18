@@ -1,5 +1,5 @@
 # GRPO方法复现
-本项目实现了qwen2.5-1.5B-Instruct模型在GSM8K数据集上的微调, 完整地复现了[GRPO算法](https://arxiv.org/pdf/2402.03300), 包括旧策略采样、参考策略采样和新策略训练. 本项中搭建的分布式训练框架适合off policy方法与deepspeed结合进行LLM分布式微调, 并且应用了LoRA方法大幅降低了训练显存开销.
+本项目实现了qwen2.5-1.5B-Instruct模型在GSM8K数据集上的全量和Lora微调, 完整地复现了[GRPO算法](https://arxiv.org/pdf/2402.03300), 包括旧策略采样、参考策略采样和新策略训练. 本项中搭建的分布式训练框架适合off policy方法与deepspeed结合进行LLM分布式微调.
 
 ## 训练框架
 ![框图](./docs/framework.png)
@@ -76,17 +76,17 @@ Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
 
 准确率评估包含答案和格式两部分:
 
-* 答案准确率在80个step达到峰值0.7左右, 最终维持在0.6左右
-* 格式准确率在150个step达到峰值1.0左右, 最终维持在0.99左右
+* 答案准确率在80个step达到峰值0.70左右, 最终维持在0.60左右
+* 格式准确率在150个step达到峰值1.00左右, 最终维持在0.99左右
 
 ### LoRA微调
-![LoRA微调准确率曲线](./docs/full_train_accuracy.png)
+![LoRA微调准确率曲线](./docs/lora_train_accuracy.png)
 准确率评估包含答案和格式两部分:
 
-* 答案准确率在
-* 格式准确率在
+* 答案准确率在70个step达到峰值0.60左右, 最终维在0.60左右
+* 格式准确率在70个step达到峰值0.97左右, 最终维持在0.95左右
 
-LoRA微调显存相对于全量微调极大减少, 梯度及优化器参数约为全量的3%. 单卡batch_size=4, 全量微调和LoRA微调的显存占用情况为:
+实践下来LoRA微调时的过程相对全量微调更加曲折, 可能存在收敛慢、训练效果不明显等情况, 需要多训练几轮. 但是显存占用相对于全量微调极大减少, 梯度及优化器参数约为全量的3%. 单卡batch_size=4, 全量微调和LoRA微调的显存占用情况为:
 <table>
 <tr>
 <td><img src="./docs/low_peak_full_bs8.png" alt="full" width="400"/></td>
@@ -122,6 +122,7 @@ CUDA_VISIBLE_DEVICES=0,1 deepspeed --num_gpus=2 training_worker.py
 * 从训练进程同步模型参数至采样进程时仅在主进程中传递即可, 否则会重复传递造成资源浪费.
 * LLM进行RLHF训练微调时若需要同步模型参数, 可以用文件系统实现. LLM通常参数量较大, 若用网络传递速度较慢且容易失败.
 * 在训练模式下前向传播时显存占用过高, 显存占用会出现一个尖峰, 非常容易OOM, 解决方法是在加载模型时开启Gradient Checkpoint `model.gradient_checkpointing_enable()`. 具体表现如下图所示, 开启前峰值显存约为17GB左右, 开启后5GB左右, 有效地防止了OOM的现象, 同时也允许更大的batch_size.
+* LoRA微调时需要更大的步长, 比如: 2e-4. 用LoRA训练时参数被约束在一个低秩子空间, 在受限的空间中找到最优解相对于全量微调需要更多的迭代步骤, 因此可以考虑更大的步长加快收敛.
 
 <table>
 <tr>
@@ -133,9 +134,6 @@ CUDA_VISIBLE_DEVICES=0,1 deepspeed --num_gpus=2 training_worker.py
 <td align="center">开启Gradient Checkpointing</td>
 </tr>
 </table>
-
-## 待完善
-* 对比7B模型作为ref_model的效果
 
 ## 参考资料
 本项目基于以下优秀项目实现, 在此进行感谢

@@ -45,7 +45,9 @@ checkpoint:
 
 # LoRA配置
 lora:
-  enabled: true
+  enabled: false
   adapter_dir: "./lora_adapter"
   rank: 32
   alpha: 64
+  learning_rate: 2e-4
+  dropout: 0.02

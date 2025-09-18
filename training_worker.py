@@ -51,6 +51,8 @@ class TrainingWorker:
         self.use_lora = config["lora"]["enabled"]
         self.lora_rank = config["lora"]["rank"]
         self.lora_alpha = config["lora"]["alpha"]
+        self.lora_lr = float(config["lora"]["learning_rate"])
+        self.lora_dropoutp = config["lora"]["dropout"]
         self.lora_adapter_dir = Path(config["lora"]["adapter_dir"])
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
         self.lora_adapter_dir.mkdir(parents=True, exist_ok=True)
@@ -117,6 +119,9 @@ class TrainingWorker:
 
         # 加载模型参数
         model_parameters = list(self.new_policy_model.parameters())
+
+        if self.use_lora:
+            ds_config['optimizer']['params']['lr'] = self.lora_lr
 
         # 初始化DeepSpeed引擎
         self.model_engine, self.optimizer, _, self.scheduler = deepspeed.initialize(
