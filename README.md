@@ -1,5 +1,5 @@
 # GRPO方法复现
-本项目实现了qwen2.5-1.5B-Instruct模型在GSM8K数据集上的全量微调, 以清晰的逻辑复现了完整的[GRPO算法](https://arxiv.org/pdf/2402.03300), 包括旧策略采样、参考策略采样和新策略训练. 本项中搭建的分布式训练框架适合off policy方法与deepspeed结合进行LLM分布式微调.
+本项目实现了qwen2.5-1.5B-Instruct模型在GSM8K数据集上的微调, 完整地复现了[GRPO算法](https://arxiv.org/pdf/2402.03300), 包括旧策略采样、参考策略采样和新策略训练. 本项中搭建的分布式训练框架适合off policy方法与deepspeed结合进行LLM分布式微调, 并且应用了LoRA方法大幅降低了训练显存开销.
 
 ## 训练框架
 ![框图](./docs/framework.png)
@@ -66,18 +66,37 @@ Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
 
 ## 效果展示
 ### 环境配置
-* 参考模型: qwen2.5-3B-Instruct
+* 参考模型: qwen2.5-3B-Instruct/qwen2.5-7B-Instruct
 * 目标模型: qwen2.5-1.5B-Instruct
 * 硬件配置: 3 × AutoDL vGPU-32G (GPU0/1用于训练, GPU2用于采样)
 * 训练步数: 200 steps (60min)
 
-### 训练结果
-![全量微调准确率曲线](./docs/train_accuracy.png)
+### 全量微调
+![全量微调准确率曲线](./docs/full_train_accuracy.png)
 
 准确率评估包含答案和格式两部分:
 
 * 答案准确率在80个step达到峰值0.7左右, 最终维持在0.6左右
 * 格式准确率在150个step达到峰值1.0左右, 最终维持在0.99左右
+
+### LoRA微调
+![LoRA微调准确率曲线](./docs/full_train_accuracy.png)
+准确率评估包含答案和格式两部分:
+
+* 答案准确率在
+* 格式准确率在
+
+LoRA微调显存相对于全量微调极大减少, 梯度及优化器参数约为全量的3%. 单卡batch_size=4, 全量微调和LoRA微调的显存占用情况为:
+<table>
+<tr>
+<td><img src="./docs/low_peak_full_bs8.png" alt="full" width="400"/></td>
+<td><img src="./docs/low_peak_lora_bs8.png" alt="lora" width="400"/></td>
+</tr>
+<tr>
+<td align="center">全量微调显存占用</td>
+<td align="center">LoRA微调显存占用</td>
+</tr>
+</table>
 
 ## 项目部署
 ```bash
@@ -89,21 +108,34 @@ git clone https://huggingface.co/datasets/openai/gsm8k
 git clone https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct
 # Qwen2.5-3B-Instruct模型下载
 git clone https://huggingface.co/Qwen/Qwen2.5-3B-Instruct
+# Qwen2.5-7B-Instruct模型下载
+git clone https://huggingface.co/Qwen/Qwen2.5-7B-Instruct
 # 启动采样进程
 python sampling_worker.py
 # 启动训练进程
 CUDA_VISIBLE_DEVICES=0,1 deepspeed --num_gpus=2 training_worker.py
 ```
 
-## 待完善:
-* LoRA方案实现
-* 清理代码结构
-
 ## 踩坑记录
 * AutoDL vGPU进行分布式训练时后台通信不能用默认的nccl, 需要改为gloo, nccl仅支持物理GPU的通信.
-* off policy方法涉及到旧策略、新策略等多个模型, 通常采样与训练分布不同进程中, 采样数据传输到训练进程后需要手动进行数据并行, 给deepspeed fork的各子进程手动分配数据, 否则会造成单卡数据过多且重复
-* 从训练进程同步模型参数至采样进程时仅在主进程中传递即可, 否则会重复传递造成资源浪费
-* LLM进行RLHF训练微调时若需要同步模型参数, 可以用文件系统实现. LLM通常参数量较大, 若用网络传递速度较慢且容易失败
+* off policy方法涉及到旧策略、新策略等多个模型, 通常采样与训练分布不同进程中, 采样数据传输到训练进程后需要手动进行数据并行, 给deepspeed fork的各子进程手动分配数据, 否则会造成单卡数据过多且重复.
+* 从训练进程同步模型参数至采样进程时仅在主进程中传递即可, 否则会重复传递造成资源浪费.
+* LLM进行RLHF训练微调时若需要同步模型参数, 可以用文件系统实现. LLM通常参数量较大, 若用网络传递速度较慢且容易失败.
+* 在训练模式下前向传播时显存占用过高, 显存占用会出现一个尖峰, 非常容易OOM, 解决方法是在加载模型时开启Gradient Checkpoint `model.gradient_checkpointing_enable()`. 具体表现如下图所示, 开启前峰值显存约为17GB左右, 开启后5GB左右, 有效地防止了OOM的现象, 同时也允许更大的batch_size.
+
+<table>
+<tr>
+<td><img src="./docs/high_peak_full_bs8.png" alt="high_peak" width="400"/></td>
+<td><img src="./docs/low_peak_full_bs8.png" alt="low_peak" width="400"/></td>
+</tr>
+<tr>
+<td align="center">未开启Gradient Checkpointing</td>
+<td align="center">开启Gradient Checkpointing</td>
+</tr>
+</table>
+
+## 待完善
+* 对比7B模型作为ref_model的效果
 
 ## 参考资料
 本项目基于以下优秀项目实现, 在此进行感谢

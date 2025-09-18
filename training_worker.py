@@ -74,8 +74,22 @@ class TrainingWorker:
         )
         self.new_policy_model.train()
         self.new_policy_model.requires_grad_(True)
+        # 启用梯度检查点
+        self.new_policy_model.gradient_checkpointing_enable()
+        print("梯度检查点已启用")
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.pretrained_model_path, padding_side='left')
+        # 启用LoRA配置和初始化
+        if self.use_lora:
+            lora_config = LoraConfig(
+                r=self.lora_rank,
+                lora_alpha=self.lora_alpha,
+                target_modules="q_proj,v_proj,k_proj,o_proj,gate_proj,down_proj,up_proj".split(","),
+                lora_dropout=0.1,
+                bias="none",
+                task_type="CAUSAL_LM"
+            )
+            self.new_policy_model = get_peft_model(self.new_policy_model, lora_config)
 
         # DeepSpeed配置和初始化
         print("正在使用DeepSpeed进行优化训练...")
@@ -100,18 +114,6 @@ class TrainingWorker:
         except json.JSONDecodeError as e:
             print(f"错误: DeepSpeed配置文件格式错误: {e}")
             raise
-
-        if self.use_lora:
-            # LoRA配置和初始化
-            lora_config = LoraConfig(
-                r=32,
-                lora_alpha=32,
-                garget_modules="q_proj,v_proj,k_proj,o_proj,gate_proj,down_proj,up_proj".split(","),
-                lora_dpoout=0.1,
-                bias="none",
-                task_type="CAUSAL_LM"
-            )
-            self.new_policy_model = get_peft_model(self.new_policy_model, lora_config)
 
         # 加载模型参数
         model_parameters = list(self.new_policy_model.parameters())
@@ -337,7 +339,6 @@ class TrainingWorker:
                     rewards = [episode.reward for episode in episodes]
                     print(f"Rank {self.rank} 开始训练步骤{train_step}，数据批次大小: {len(episodes)}, 奖励为: {rewards}")
 
-                    # 执行训练步骤
                     loss = self.train_step(episodes)
                     train_step += 1
 

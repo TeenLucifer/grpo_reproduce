@@ -178,7 +178,7 @@ class SamplingWorker:
             }
             serialized_data.append(data)
         return serialized_data
-    
+
     def run(self):
         """主运行循环"""
         print("开始采样循环...")
@@ -209,7 +209,10 @@ class SamplingWorker:
                             print(f"最新LoRA模型参数不存在, 跳过")
                         else:
                             try:
-                                self.old_policy_model = PeftModel.from_pretrained(self.old_policy_model, self.lora_adapter_dir, is_trainable=False)
+                                if isinstance(self.old_policy_model, PeftModel):
+                                    self.old_policy_model.load_adapter(self.lora_adapter_dir, adapter_name="default", is_trainable=False)
+                                else:
+                                    self.old_policy_model = PeftModel.from_pretrained(self.old_policy_model, self.lora_adapter_dir, is_trainable=False)
                                 self.old_policy_model.eval()
                                 print(f"成功更新最新LoRA模型参数: {self.lora_adapter_dir}")
                             except Exception as e:

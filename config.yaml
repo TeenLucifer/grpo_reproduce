@@ -9,11 +9,11 @@ model:
 # 数据配置
 data:
   data_path: "./gsm8k"
-  max_gen_len: 700
+  max_gen_len: 500
   test_size: 100
   sample_batch_size: 8 # 采样批次大小
   train_batch_size: 4  # 单进程训练批次大小
-  test_batch_size: 20  # 评估平次大小
+  test_batch_size: 20  # 评估批次大小
   num_answers_per_question: 4 # 每个问题组内采样数量
 
 # 训练配置
