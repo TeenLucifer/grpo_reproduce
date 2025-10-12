@@ -16,7 +16,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from torch.utils.data import DataLoader
 import torch.distributed as dist
 from data_types import Gsm8kTasksDataset, Episode
-from utils import group_advantages, grpo_loss, train_accuracy, get_batch_log_probs, sample_trajectory, reward_function
+from utils import group_advantages, grpo_loss, gspo_loss, train_accuracy, get_batch_log_probs, sample_trajectory, reward_function
 import deepspeed
 import numpy as np
 from peft import LoraConfig, get_peft_model
@@ -42,6 +42,7 @@ class TrainingWorker:
         self.data_path = config["data"]["data_path"]
         self.num_answers_per_question = config["data"]["num_answers_per_question"]
         self.num_questions_per_batch = self.train_batch_size // self.num_answers_per_question
+        self.use_gspo = config["training"]["use_gspo"]
         self.eval_interval = config["training"]["eval_interval"]
         self.sync_interval = config["training"]["sync_interval"]
         self.zmq_data_port = config["communication"]["data_port"]
@@ -239,14 +240,24 @@ class TrainingWorker:
         ref_policy_log_probs = torch.tensor(np.array([episode.ref_policy_log_probs for episode in episodes]), dtype=self.dtype, device=self.device)
         old_policy_log_probs = torch.tensor(np.array([episode.old_policy_log_probs for episode in episodes]), dtype=self.dtype, device=self.device)
 
-        loss = grpo_loss(
-            ref_policy_log_probs=ref_policy_log_probs,
-            old_policy_log_probs=old_policy_log_probs,
-            new_policy_log_probs=new_policy_log_probs,
-            attention_mask=attention_mask,
-            advantages=advantages,
-            prefix_len=prefix_len
-        )
+        if self.use_gspo:
+            loss = gspo_loss(
+                ref_policy_log_probs=ref_policy_log_probs,
+                old_policy_log_probs=old_policy_log_probs,
+                new_policy_log_probs=new_policy_log_probs,
+                attention_mask=attention_mask,
+                advantages=advantages,
+                prefix_len=prefix_len
+            )
+        else:
+            loss = grpo_loss(
+                ref_policy_log_probs=ref_policy_log_probs,
+                old_policy_log_probs=old_policy_log_probs,
+                new_policy_log_probs=new_policy_log_probs,
+                attention_mask=attention_mask,
+                advantages=advantages,
+                prefix_len=prefix_len
+            )
 
         # 反向传播和优化步骤
         self.model_engine.backward(loss)

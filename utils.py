@@ -25,6 +25,44 @@ def group_advantages(rewards: torch.Tensor, num_answers_per_question: int):
 
     return advantages
 
+def gspo_loss(
+    ref_policy_log_probs: torch.Tensor,
+    old_policy_log_probs: torch.Tensor,
+    new_policy_log_probs: torch.Tensor,
+    attention_mask: torch.Tensor,
+    advantages: torch.Tensor,
+    prefix_len: int,
+    clip_epsilon: float=0.2,
+    kl_beta: float=0.04
+):
+    batch_size = ref_policy_log_probs.shape[0]
+
+    # 取生成部分的概率分布
+    ref_policy_log_probs_ = ref_policy_log_probs[:, prefix_len-1:] # token_0裁剪了, 因此需要裁剪的长度为prefix_len-1
+    old_policy_log_probs_ = old_policy_log_probs[:, prefix_len-1:]
+    new_policy_log_probs_ = new_policy_log_probs[:, prefix_len-1:]
+    attention_mask_       = attention_mask[:, prefix_len:]         # attention_mask维度中token_0的位置没裁剪, 因此需要裁剪的长度为prefix_len
+
+    # 计算有效序列, 遮掩pad_token
+    valid_seq_len = attention_mask_.sum(dim=1)
+    new_old_log_probs_ = (new_policy_log_probs_ - old_policy_log_probs_) * attention_mask_
+    ref_new_log_probs_ = (ref_policy_log_probs_ - new_policy_log_probs_) * attention_mask_
+
+    # 序列级别的重要性采样
+    importance_ratio = torch.exp(new_old_log_probs_.sum(dim=1) / valid_seq_len).view(batch_size, 1) # batch_size * 1
+    cliped_ratio = torch.clip(importance_ratio, 1 - clip_epsilon, 1 + clip_epsilon) # batch_size * 1
+    importance_term = importance_ratio * advantages # batch_size * 1
+    clip_term = cliped_ratio * advantages # batch_size * 1
+
+    kl_term = torch.exp(ref_new_log_probs_.sum(dim=1) / valid_seq_len) - (ref_new_log_probs_.sum(dim=1) / valid_seq_len) - 1
+    kl_term = kl_term.view(batch_size, 1)
+
+    objective_function = torch.min(importance_term, clip_term) - kl_beta * kl_term
+    sequence_loss = -objective_function
+
+    # 批次平均损失作为总损失
+    loss = sequence_loss.mean()
+    return loss
 
 def grpo_loss(
     ref_policy_log_probs: torch.Tensor,
