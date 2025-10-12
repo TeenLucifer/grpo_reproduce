@@ -22,7 +22,7 @@ $$
 w_{i, t}(\theta) = \frac{\pi_\theta(y_{i,t} \mid x, y_{i<t})}{\pi_{\theta_{old}}(y_{i,t} \mid x, y_{i<t})}
 $$
 $$
-\hat{A}_{i, t}=\hat{A}_i=\frac{r\left(x, y_i\right)-\text{mean}\left(\left\{r\left(x, y_i\right)\right\}_{i=1}^G\right)}{\text{std}\left(\left\{r\left(x, y_i\right)\right\}_{i=1}^G\right)}
+\hat{A}_{i, t}=\hat{A}_i=\frac{r(x, y_i)-\text{mean}(\{r(x, y_i)\}_{i=1}^G)}{\text{std}(\{r(x, y_i)\}_{i=1}^G)}
 $$
 
 其中$w_{i,t}$表示token级别的重要性采样, $\hat{A}_{i}$表示序列的组内回报值:
