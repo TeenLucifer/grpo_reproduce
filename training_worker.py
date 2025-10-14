@@ -288,6 +288,7 @@ class TrainingWorker:
             success_num = 0
             format_success_num = 0
             answer_success_num = 0
+            entropy_sum = 0.0
             for batch in test_dataloader:
                 episodes = sample_trajectory(
                     model=self.model_engine.module,
@@ -299,6 +300,7 @@ class TrainingWorker:
                     device=self.device,
                     dtype=self.dtype
                 )
+                # 评估准确率
                 for episode in episodes:
                     if np.abs(episode.reward_info["format_reward"] - 1.25) < 1e-3:
                         format_success_num = format_success_num + 1
@@ -306,11 +308,26 @@ class TrainingWorker:
                         answer_success_num = answer_success_num + 1
                     if np.abs(episode.reward - 2.25) < 1e-3:
                         success_num = success_num + 1
+
+                # 评估entropy
+                batch_token_ids = torch.tensor([episode.whole_token_ids for episode in episodes], dtype=torch.long, device=self.device)
+                attention_mask = (batch_token_ids != self.tokenizer.pad_token_id).long()
+                with torch.no_grad():
+                    batch_logits = self.model_engine(input_ids=batch_token_ids, attention_mask=attention_mask).logits
+                batch_logits = batch_logits[:, :-1, :]       # 去掉最后一个logits, 因为最后一个用于预测下一个token
+                batch_probs = torch.softmax(batch_logits, dim=-1)
+                batch_log_probs = torch.log(batch_probs + 1e-12)
+                batch_token_entropy = -torch.sum(batch_probs * batch_log_probs, dim=-1) # batch_size * seq_len
+                batch_entropy = batch_token_entropy.mean(dim=-1)
+                entropy_sum += batch_entropy.sum().item()
+
+
             success_rate = success_num / self.test_size
             format_success_rate = format_success_num / self.test_size
             answer_success_rate = answer_success_num / self.test_size
+            entropy = entropy_sum / self.test_size
             self.model_engine.module.train() # 模型调整回训练模式
-        return success_rate, format_success_rate, answer_success_rate
+        return success_rate, format_success_rate, answer_success_rate, entropy
 
     def run(self):
         """主运行循环"""
@@ -320,8 +337,8 @@ class TrainingWorker:
         # 评估原始模型的准确率
         if self.is_main_process and train_step % self.eval_interval == 0:
             eval_start_time = time.time()
-            accuracy, format_accuracy, answer_accuracy = self.evaluate()
-            print(f"第 {train_step} 步训练后评估模型性能, 准确率: {accuracy}, 格式准确率: {format_accuracy}, 回答准确率: {answer_accuracy}, 评估时间: {time.time() - eval_start_time:.2f}")
+            accuracy, format_accuracy, answer_accuracy, entropy = self.evaluate()
+            print(f"第 {train_step} 步训练后评估模型性能, 格式准确率: {format_accuracy}, 回答准确率: {answer_accuracy}, 平均熵: {entropy}, 评估时间: {time.time() - eval_start_time:.2f}")
         try:
             while not self.stop_event.is_set():
                 try:
@@ -371,14 +388,8 @@ class TrainingWorker:
                     # 定期评估模型性能(只在主进程进行评估)
                     if self.is_main_process and train_step % self.eval_interval == 0:
                         eval_start_time = time.time()
-                        accuracy, format_accuracy, answer_accuracy = self.evaluate()
-                        print(f"第 {train_step} 步训练后评估模型性能, 准确率: {accuracy}, 格式准确率: {format_accuracy}, 回答准确率: {answer_accuracy}, 评估时间: {time.time() - eval_start_time:.2f}")
-
-                    # 定期打印训练信息（只有主进程打印，避免重复输出）
-                    if self.is_main_process and train_step % 10 == 0:
-                        format_accuracy, answer_accuracy = train_accuracy(episodes=episodes)
-                        current_lr = self.model_engine.get_lr()[0]
-                        print(f"训练步骤 {train_step}, Loss: {loss.item():.4f}, LR: {current_lr:.2e}, F_Acc: {format_accuracy}, A_acc: {answer_accuracy}")
+                        accuracy, format_accuracy, answer_accuracy, entropy = self.evaluate()
+                        print(f"第 {train_step} 步训练后评估模型性能, 格式准确率: {format_accuracy}, 回答准确率: {answer_accuracy}, 平均熵: {entropy}, 评估时间: {time.time() - eval_start_time:.2f}")
 
                 except zmq.Again:
                     # 没有数据，继续循环
