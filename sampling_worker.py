@@ -265,8 +265,8 @@ def main():
         config = yaml.safe_load(f)
     
     print("=== GRPO采样进程 ===")
-    print(f"GPU ID: {config["gpu"]["sampling_gpu"]}")
-    print(f"数据端口: {config["communication"]["data_port"]}")
+    print(f"GPU ID: {config['gpu']['sampling_gpu']}")
+    print(f"数据端口: {config['communication']['data_port']}")
 
     # 创建并运行采样进程
     worker = SamplingWorker(config)

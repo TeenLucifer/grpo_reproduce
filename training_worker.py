@@ -436,7 +436,7 @@ def main():
     worker = TrainingWorker(config=config)
 
     print("=== GRPO训练进程 ===")
-    print(f"数据端口: {config["communication"]["data_port"]}")
+    print(f"数据端口: {config['communication']['data_port']}")
     print(f"DeepSpeed: 启用")
     print(f"当前进程: Rank {worker.rank}/{worker.world_size-1}, 主进程: {worker.is_main_process}")
 
