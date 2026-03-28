@@ -8,3 +8,5 @@ tornado
 transformers
 deepspeed
 peft
+pyzmq
+pandas
